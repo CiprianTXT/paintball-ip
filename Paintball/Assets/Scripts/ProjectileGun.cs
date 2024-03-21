@@ -56,7 +56,17 @@ public class ProjectileGun : MonoBehaviour
 
         //Set ammo display, if it exists :D
         if (ammunitionDisplay != null)
-            ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
+        {
+            if (bulletsLeft / bulletsPerTap == 0)
+            {
+                ammunitionDisplay.SetText("Reload\n" +  bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
+            } else
+            {
+                ammunitionDisplay.SetText("\n" + bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
+            }
+        }
+            
+            
     }
     private void MyInput()
     {
