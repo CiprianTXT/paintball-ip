@@ -39,6 +39,7 @@ public class ProjectileGun : MonoBehaviour
     //Graphics
     public GameObject muzzleFlash;
     public TextMeshProUGUI ammunitionDisplay;
+    public TextMeshProUGUI actionDisplay;
 
     //bug fixing :D
     public bool allowInvoke = true;
@@ -57,13 +58,17 @@ public class ProjectileGun : MonoBehaviour
         //Set ammo display, if it exists :D
         if (ammunitionDisplay != null)
         {
-            if (bulletsLeft / bulletsPerTap == 0)
+            if (bulletsLeft / bulletsPerTap == 0 && reloading == false)
             {
-                ammunitionDisplay.SetText("Reload\n" +  bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
+                actionDisplay.SetText("Reload");
+            } else if (reloading == true)
+            {
+                actionDisplay.SetText("Reloading...");
             } else
             {
-                ammunitionDisplay.SetText("\n" + bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
+                actionDisplay.SetText("");
             }
+            ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
         }
             
             
