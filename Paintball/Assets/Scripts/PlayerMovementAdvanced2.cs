@@ -95,11 +95,15 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         Collider[] colliders = Physics.OverlapSphere(transform.position, playerHeight * 0.5f + 0.2f);
 
         grounded = false;
+        PhysicMaterial playerMaterial = null; // Store the physics material of the player
+
         foreach (Collider col in colliders)
         {
             if (!IsChildOfTransform(col.transform, transform) && !col.CompareTag("Player"))
             {
                 grounded = true;
+                // Get the PhysicsMaterial of the collider the player is standing on
+                playerMaterial = col.sharedMaterial;
                 break;
             }
         }
@@ -110,9 +114,16 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
 
         // handle drag
         if (grounded)
-            rb.drag = groundDrag;
-        else
+        {
+            if (playerMaterial != null)
+                rb.drag = playerMaterial.dynamicFriction; // Use dynamicFriction as drag
+            else
+                rb.drag = groundDrag;
+        } else
+        { 
             rb.drag = 0;
+        }
+           
     }
 
     private void FixedUpdate()
@@ -139,7 +150,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         if (Input.GetKeyDown(crouchKey))
         {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
-            rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
+            rb.AddForce(Vector3.down * 50f, ForceMode.Impulse);
         }
 
         // stop crouch
@@ -168,6 +179,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             state = MovementState.crouching;
             desiredMoveSpeed = crouchSpeed;
+            //rb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
 
         // Mode - Sprinting

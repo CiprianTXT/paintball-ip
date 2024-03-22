@@ -54,16 +54,19 @@ public class ProjectileGun : MonoBehaviour
     private void Update()
     {
         MyInput();
-
+        actionDisplay.color = Color.white;
         //Set ammo display, if it exists :D
         if (ammunitionDisplay != null)
         {
             if (bulletsLeft / bulletsPerTap == 0 && reloading == false)
             {
+                actionDisplay.color = Color.red;
                 actionDisplay.SetText("Reload");
-            } else if (reloading == true)
+ 
+            }
+            else if (reloading == true)
             {
-                actionDisplay.SetText("Reloading...");
+                actionDisplay.SetText(" Reloading...");
             } else
             {
                 actionDisplay.SetText("");
