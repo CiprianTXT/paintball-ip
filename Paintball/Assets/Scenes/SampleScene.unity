@@ -1808,7 +1808,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 781377513}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.07595021, y: 0.117426306, z: 0.009007437, w: 0.9901321}
+  m_LocalRotation: {x: -0.075950205, y: 0.11742627, z: 0.009007434, w: 0.9901321}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2039,7 +2039,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.07595022, y: 0.117426336, z: 0.009007441, w: 0.9901321}
+  m_LocalRotation: {x: -0.075950205, y: 0.11742626, z: 0.009007433, w: 0.9901321}
   m_LocalPosition: {x: -3.510613, y: -0.43278992, z: -2.3726501}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3133,16 +3133,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0834fbc5a1f6ae14c83bb2f60378daf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bullet: {fileID: 2949730657375550734, guid: 696bb539bc413824a9f151060b45ad84, type: 3}
+  bullet: {fileID: 386520990438850818, guid: 6fd63792a4dddd8418f0028040f789fd, type: 3}
   shootForce: 40
   upwardForce: 0
   timeBetweenShooting: 1
-  spread: 10
+  spread: 5
   reloadTime: 1
   timeBetweenShots: 0
   magazineSize: 200
   bulletsPerTap: 10
-  allowButtonHold: 1
+  allowButtonHold: 0
   playerRb: {fileID: 412701722}
   recoilForce: 10
   fpsCam: {fileID: 963194227}
@@ -3221,7 +3221,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1539812770}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.055440802, y: 0.11758755, z: 0.0065750894, w: 0.991492}
+  m_LocalRotation: {x: -0.05544078, y: 0.11758759, z: 0.006575089, w: 0.991492}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
