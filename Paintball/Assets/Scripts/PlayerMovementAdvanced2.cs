@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovementAdvanced2 : MonoBehaviour
 {
@@ -61,10 +62,12 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         sprinting,
         crouching,
         sliding,
+        climbing,
         air
     }
 
     public bool sliding;
+    public bool climbing;
 
     private void Start()
     {
@@ -92,7 +95,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
     private void Update()
     {
         // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position, playerHeight * 0.5f + 0.2f);
+        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 1f);
 
         grounded = false;
         PhysicMaterial playerMaterial = null; // Store the physics material of the player
@@ -162,6 +165,14 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
 
     private void StateHandler()
     {
+
+        // Mode - Climbing
+        if (climbing)
+        {
+            state = MovementState.climbing;
+
+        }
+
         // Mode - Sliding
         if (sliding)
         {
@@ -179,7 +190,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             state = MovementState.crouching;
             desiredMoveSpeed = crouchSpeed;
-            //rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+            rb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
 
         // Mode - Sprinting

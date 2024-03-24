@@ -50,6 +50,7 @@ public class CustomBullet : MonoBehaviour
 
     private void Explode()
     {
+
         //Instantiate explosion
         if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
 
@@ -80,6 +81,10 @@ public class CustomBullet : MonoBehaviour
         //Don't count collisions with other bullets
         if (collision.collider.CompareTag("Bullet")) return;
 
+        // Check if collision is with any child of the parent GameObject
+        Transform parentTransform = transform.parent;
+        if (parentTransform != null && collision.transform.IsChildOf(parentTransform)) return;
+        
         //Count up collisions
         collisions++;
 

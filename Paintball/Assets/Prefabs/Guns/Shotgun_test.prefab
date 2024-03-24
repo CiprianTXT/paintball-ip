@@ -201,7 +201,9 @@ GameObject:
   - component: {fileID: 1531872561517345450}
   - component: {fileID: 7536331776735844494}
   - component: {fileID: 6520828891147857756}
+  - component: {fileID: 6331211694167387062}
   - component: {fileID: 4241254283719641585}
+  - component: {fileID: -755339509718208554}
   m_Layer: 0
   m_Name: Shotgun_test
   m_TagString: Untagged
@@ -300,6 +302,33 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: e42a245ddc40f744994b4b96b407ec47, type: 3}
+--- !u!54 &6331211694167387062
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5905105957098603740}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 1024
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!114 &4241254283719641585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,14 +351,26 @@ MonoBehaviour:
   magazineSize: 20
   bulletsPerTap: 5
   allowButtonHold: 0
-  playerRb: {fileID: 0}
   recoilForce: 10
-  fpsCam: {fileID: 0}
   attackPoint: {fileID: 1286004651119852378}
   muzzleFlash: {fileID: 0}
-  ammunitionDisplay: {fileID: 0}
-  actionDisplay: {fileID: 0}
   allowInvoke: 1
+--- !u!114 &-755339509718208554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5905105957098603740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f8ffbe3c7c32594c8963a7a84dbaf24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickUpRange: 4
+  dropForwardForce: 7
+  dropUpwardForce: 3
+  equipped: 0
 --- !u!1 &6009877373574598044
 GameObject:
   m_ObjectHideFlags: 0

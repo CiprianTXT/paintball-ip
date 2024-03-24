@@ -26,20 +26,20 @@ public class ProjectileGun : MonoBehaviour
     int bulletsLeft, bulletsShot;
 
     //Recoil
-    public Rigidbody playerRb;
+    private Rigidbody playerRb;
     public float recoilForce;
 
     //bools
     bool shooting, readyToShoot, reloading;
 
     //Reference
-    public Camera fpsCam;
+    private static Camera fpsCam;
     public Transform attackPoint;
 
     //Graphics
     public GameObject muzzleFlash;
-    public TextMeshProUGUI ammunitionDisplay;
-    public TextMeshProUGUI actionDisplay;
+    private TextMeshProUGUI ammunitionDisplay;
+    private TextMeshProUGUI actionDisplay;
 
     //bug fixing :D
     public bool allowInvoke = true;
@@ -47,34 +47,50 @@ public class ProjectileGun : MonoBehaviour
     private void Awake()
     {
         //make sure magazine is full
+
         bulletsLeft = magazineSize;
         readyToShoot = true;
+
+        // Find fpsCam
+        fpsCam = GameObject.Find("CameraHolder").GetComponentInChildren<Camera>();
+
+        // Find UI children
+        Transform uiCanvas = GameObject.Find("UI").transform;
+        ammunitionDisplay = uiCanvas.Find("BulletDisplay").GetComponent<TextMeshProUGUI>();
+        actionDisplay = uiCanvas.Find("ActionDisplay").GetComponent<TextMeshProUGUI>();
+
+        //Find player RB
+        playerRb = GameObject.Find("Player").GetComponent<Rigidbody>();
     }
 
     private void Update()
     {
-        MyInput();
-        actionDisplay.color = Color.white;
+
         //Set ammo display, if it exists :D
+        actionDisplay.color = Color.white;
         if (ammunitionDisplay != null)
         {
             if (bulletsLeft / bulletsPerTap == 0 && reloading == false)
             {
                 actionDisplay.color = Color.red;
                 actionDisplay.SetText("Reload");
- 
+
             }
             else if (reloading == true)
             {
                 actionDisplay.SetText(" Reloading...");
-            } else
+            }
+            else
             {
                 actionDisplay.SetText("");
             }
             ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
         }
-            
-            
+
+
+        MyInput();
+        
+   
     }
     private void MyInput()
     {
@@ -126,7 +142,7 @@ public class ProjectileGun : MonoBehaviour
         Vector3 directionWithSpread = directionWithoutSpread + new Vector3(x, y, 0); //Just add spread to last direction
 
         //Instantiate bullet/projectile
-        GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity); //store instantiated bullet in currentBullet
+        GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity, playerRb.transform); //store instantiated bullet in currentBullet
         //Rotate bullet to shoot direction
         currentBullet.transform.forward = directionWithSpread.normalized;
 

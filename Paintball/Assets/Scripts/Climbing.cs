@@ -7,7 +7,7 @@ public class Climbing : MonoBehaviour
     [Header("References")]
     public Transform orientation;
     public Rigidbody rb;
-    public PlayerMovementAdvanced pm;
+    public PlayerMovementAdvanced2 pm;
     public LayerMask whatIsWall;
 
     [Header("Climbing")]
