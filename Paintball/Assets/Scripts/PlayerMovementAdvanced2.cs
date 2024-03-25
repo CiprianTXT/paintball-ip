@@ -95,7 +95,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
     private void Update()
     {
         // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 1f);
+        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.5f);
 
         grounded = false;
         PhysicMaterial playerMaterial = null; // Store the physics material of the player

@@ -60,6 +60,10 @@ public class PickUpController : MonoBehaviour
 
     private void Update()
     {
+
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
         //Check if player is in range and "E" is pressed
         Vector3 distanceToPlayer = player.position - transform.position;
         if (!equipped && distanceToPlayer.magnitude <= pickUpRange && Input.GetKeyDown(KeyCode.E) && !slotFull) PickUp();
@@ -92,7 +96,7 @@ public class PickUpController : MonoBehaviour
         gunScript.enabled = true;
     }
 
-    private void Drop()
+    public void Drop()
     {
         ammunitionDisplay.enabled = false;
         actionDisplay.enabled = false;

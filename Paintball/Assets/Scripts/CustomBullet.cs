@@ -61,11 +61,18 @@ public class CustomBullet : MonoBehaviour
             //Get component of enemy and call Take Damage
 
             //Just an example!
-            ///enemies[i].GetComponent<ShootingAi>().TakeDamage(explosionDamage);
+
+            PlayerStatsHandler statScript = enemies[i].GetComponentInParent<PlayerStatsHandler>();
+            if(statScript && statScript.gameObject.transform != gameObject.transform.parent)
+            {
+                statScript.TakeDamage(explosionDamage);
+                Destroy(gameObject);
+            }
+                
 
             //Add explosion force (if enemy has a rigidbody)
-            if (enemies[i].GetComponent<Rigidbody>())
-                enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
+            //if (enemies[i].GetComponent<Rigidbody>())
+                //enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
         }
 
         //Add a little delay, just to make sure everything works fine
