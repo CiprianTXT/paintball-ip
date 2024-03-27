@@ -5815,8 +5815,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2062282427}
   - component: {fileID: 2062282426}
+  - component: {fileID: 2062282428}
   m_Layer: 0
-  m_Name: Decal Projector
+  m_Name: DecalProjector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5861,6 +5862,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 2, y: -90, z: -90}
+--- !u!114 &2062282428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2062282425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd31f0aaf53f6bc49a22778e457fa09e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  splashColor: {r: 0.9281879, g: 0, b: 0.9339623, a: 0}
 --- !u!1 &2144220619
 GameObject:
   m_ObjectHideFlags: 0

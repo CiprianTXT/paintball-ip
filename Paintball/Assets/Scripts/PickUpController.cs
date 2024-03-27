@@ -61,8 +61,8 @@ public class PickUpController : MonoBehaviour
     private void Update()
     {
 
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //RaycastHit hit;
+        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         //Check if player is in range and "E" is pressed
         Vector3 distanceToPlayer = player.position - transform.position;

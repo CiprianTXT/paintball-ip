@@ -44,6 +44,8 @@ public class ProjectileGun : MonoBehaviour
     //bug fixing :D
     public bool allowInvoke = true;
 
+    private Material[] materials;
+
     private void Awake()
     {
         //make sure magazine is full
@@ -61,6 +63,9 @@ public class ProjectileGun : MonoBehaviour
 
         //Find player RB
         playerRb = GameObject.Find("Player").GetComponent<Rigidbody>();
+
+        //Extract player materials
+        materials = playerRb.transform.Find("PlayerUpdatedModel").GetComponent<MeshRenderer>().materials;
     }
 
     private void Update()
@@ -145,6 +150,35 @@ public class ProjectileGun : MonoBehaviour
         GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity, playerRb.transform); //store instantiated bullet in currentBullet
         //Rotate bullet to shoot direction
         currentBullet.transform.forward = directionWithSpread.normalized;
+
+
+
+
+        //Color the bullet accordingly
+
+
+        Color col = new Color(0, 0, 0);
+        bool ok = false;
+        foreach (Material mat in materials)
+        {
+            Debug.Log(mat.name);
+            if (mat.name == "suit_material (Instance)")
+            {
+                col = mat.color;
+                ok = true;
+                break;
+            }
+        }
+
+        if (!ok)
+        {
+            Debug.Log("error finding col");
+        }
+        else
+        {
+            currentBullet.GetComponent<CustomBullet>().paintColor = col;
+        }
+
 
         //Add forces to bullet
         currentBullet.GetComponent<Rigidbody>().AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);

@@ -19,6 +19,7 @@ public class CustomBullet : MonoBehaviour
     [Range(0f,1f)]
     public float bounciness;
     public bool useGravity;
+    public Color paintColor;
 
     //Damage
     public int explosionDamage;
@@ -41,7 +42,12 @@ public class CustomBullet : MonoBehaviour
     private void Update()
     {
         //When to explode:
-        if (collisions > maxCollisions) Explode();
+        if (collisions > maxCollisions)
+        {
+            Destroy(gameObject);
+            Explode();
+        }
+            
 
         //Count down lifetime
         maxLifetime -= Time.deltaTime;
@@ -53,6 +59,7 @@ public class CustomBullet : MonoBehaviour
 
         //Instantiate explosion
         if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
+
 
         //Check for enemies 
         Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, whatIsEnemies);
@@ -66,7 +73,7 @@ public class CustomBullet : MonoBehaviour
             if(statScript && statScript.gameObject.transform != gameObject.transform.parent)
             {
                 statScript.TakeDamage(explosionDamage);
-                Destroy(gameObject);
+                
             }
                 
 
@@ -108,6 +115,11 @@ public class CustomBullet : MonoBehaviour
 
     private void Setup()
     {
+        //Create new material
+        Material mat = new Material(GetComponent<MeshRenderer>().material);
+        mat.color = paintColor;
+        GetComponent<MeshRenderer>().material = mat;
+
         //Create a new Physic material
         physics_mat = new PhysicMaterial();
         physics_mat.bounciness = bounciness;
