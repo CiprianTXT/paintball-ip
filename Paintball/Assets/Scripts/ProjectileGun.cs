@@ -178,7 +178,7 @@ public class ProjectileGun : MonoBehaviour
         {
             currentBullet.GetComponent<CustomBullet>().paintColor = col;
         }
-
+       
 
         //Add forces to bullet
         currentBullet.GetComponent<Rigidbody>().AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);

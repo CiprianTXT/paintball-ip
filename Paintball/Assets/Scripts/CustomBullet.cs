@@ -39,6 +39,8 @@ public class CustomBullet : MonoBehaviour
     int collisions;
     PhysicMaterial physics_mat;
     public DecalProjector dp;
+    
+
 
     private void Start()
     {
@@ -50,8 +52,9 @@ public class CustomBullet : MonoBehaviour
         //When to explode:
         if (collisions > maxCollisions)
         {
-            Destroy(gameObject);
+            GetComponent<MeshRenderer>().enabled = false;
             Explode();
+            Destroy(gameObject);
         }
             
 
@@ -62,55 +65,59 @@ public class CustomBullet : MonoBehaviour
 
     private void Explode()
     {
-
-        //Instantiate explosion
+        // Instantiate explosion
         if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
 
-        //Instantiate color splash
-
-        
+        // Instantiate color splash
         DecalProjector decal = Instantiate(dp, transform.position, Quaternion.identity);
         decal.GetComponent<DecalColorSetter>().splashColor = paintColor;
+
+        Ray ray = new Ray(transform.position, transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            float positionMultiplier = 0.01f;
+            float spawnX = hit.point.x - ray.direction.x * positionMultiplier;
+            float spawnY = hit.point.y - ray.direction.y * positionMultiplier;
+            float spawnZ = hit.point.z - ray.direction.z * positionMultiplier;
+            Vector3 spawnLocation = new Vector3(spawnX, spawnY, spawnZ);
+
+
+            //Vector3 spawnLocation = hit.point + hit.normal * positionMultiplier;
+
+            Quaternion targetRot = Quaternion.LookRotation(-transform.forward, transform.up - transform.forward); // Inverse of the hit normal
+            //decal.transform.rotation = targetRot;
+            Vector3 curRot = targetRot.eulerAngles;
+            curRot.x = -curRot.x;
+            curRot.y += 180; 
+            curRot.z = -curRot.z;
+
+            decal.transform.rotation = Quaternion.Euler(curRot);
+            decal.transform.position = spawnLocation;
+        }
+        
 
 
         Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, whatIsEnemies);
 
-        Vector3 sumNormals = Vector3.zero;
-
-        for (int i = 0; i < enemies.Length; i++)
+        foreach (var enemy in enemies)
         {
-            RaycastHit[] hits;
-            hits = Physics.RaycastAll(transform.position, enemies[i].transform.position - transform.position, explosionRange);
-            System.Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
+            // Get the enemy's collider
+            Collider enemyCollider = enemy.GetComponent<Collider>();
+            if (enemyCollider == null) continue;
 
-            sumNormals += hits[0].normal;
-
-
-            // Accumulate the normals
-                
-
-            // Get component of enemy and call Take Damage
-            PlayerStatsHandler statScript = enemies[i].GetComponentInParent<PlayerStatsHandler>();
-            if (statScript && statScript.gameObject.transform != gameObject.transform.parent)
-            {
-                statScript.TakeDamage(explosionDamage);
-            }
-
-            // Add explosion force (if enemy has a rigidbody)
-            //if (enemies[i].GetComponent<Rigidbody>())
-            //    enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
-            
         }
+        
+        //decal.transform.rotation = Quaternion.LookRotation(-transform.forward, transform.up - transform.forward);
 
-        Quaternion oppositeRotation = Quaternion.LookRotation(-sumNormals, Vector3.up);
-
-        // Apply the rotation to the decal
-        decal.transform.rotation = oppositeRotation;
-
-
-        //Add a little delay, just to make sure everything works fine
+        // Add a little delay, just to make sure everything works fine
         Invoke("Delay", 0.05f);
     }
+
+
+
+
     private void Delay()
     {
         Destroy(gameObject);
@@ -134,7 +141,6 @@ public class CustomBullet : MonoBehaviour
         if (collision.collider.CompareTag("Breakable"))
         {
             Destroy(collision.gameObject);
-
             Destroy(gameObject);
         }
     }
@@ -156,6 +162,7 @@ public class CustomBullet : MonoBehaviour
 
         //Set gravity
         rb.useGravity = useGravity;
+
     }
 
     /// Just to visualize the explosion range
