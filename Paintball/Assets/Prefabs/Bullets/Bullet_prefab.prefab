@@ -153,9 +153,11 @@ MonoBehaviour:
     m_Bits: 1024
   bounciness: 0
   useGravity: 1
+  paintColor: {r: 0, g: 0, b: 0, a: 0}
   explosionDamage: 10
   explosionRange: 1
   explosionForce: 1
   maxCollisions: 0
   maxLifetime: 3
   explodeOnTouch: 1
+  dp: {fileID: 5080730477979033116, guid: af12962d51e66714b97f8006b9db427d, type: 3}

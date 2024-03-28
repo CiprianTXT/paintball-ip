@@ -1,4 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using System.Collections;
+using System.Collections.Generic;
+using static UnityEngine.UI.Image;
+using UnityEditor.PackageManager;
 
 /// Thanks for downloading my custom bullets/projectiles script! :D
 /// Feel free to use it in any project you like!
@@ -33,6 +38,7 @@ public class CustomBullet : MonoBehaviour
 
     int collisions;
     PhysicMaterial physics_mat;
+    public DecalProjector dp;
 
     private void Start()
     {
@@ -60,27 +66,47 @@ public class CustomBullet : MonoBehaviour
         //Instantiate explosion
         if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
 
+        //Instantiate color splash
 
-        //Check for enemies 
+        
+        DecalProjector decal = Instantiate(dp, transform.position, Quaternion.identity);
+        decal.GetComponent<DecalColorSetter>().splashColor = paintColor;
+
+
         Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, whatIsEnemies);
+
+        Vector3 sumNormals = Vector3.zero;
+
         for (int i = 0; i < enemies.Length; i++)
         {
-            //Get component of enemy and call Take Damage
+            RaycastHit[] hits;
+            hits = Physics.RaycastAll(transform.position, enemies[i].transform.position - transform.position, explosionRange);
+            System.Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
 
-            //Just an example!
+            sumNormals += hits[0].normal;
 
+
+            // Accumulate the normals
+                
+
+            // Get component of enemy and call Take Damage
             PlayerStatsHandler statScript = enemies[i].GetComponentInParent<PlayerStatsHandler>();
-            if(statScript && statScript.gameObject.transform != gameObject.transform.parent)
+            if (statScript && statScript.gameObject.transform != gameObject.transform.parent)
             {
                 statScript.TakeDamage(explosionDamage);
-                
             }
-                
 
-            //Add explosion force (if enemy has a rigidbody)
+            // Add explosion force (if enemy has a rigidbody)
             //if (enemies[i].GetComponent<Rigidbody>())
-                //enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
+            //    enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
+            
         }
+
+        Quaternion oppositeRotation = Quaternion.LookRotation(-sumNormals, Vector3.up);
+
+        // Apply the rotation to the decal
+        decal.transform.rotation = oppositeRotation;
+
 
         //Add a little delay, just to make sure everything works fine
         Invoke("Delay", 0.05f);
