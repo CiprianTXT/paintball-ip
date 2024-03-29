@@ -6,6 +6,7 @@ public class SpawnBullets : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform spawnPoint;
     public float spawnInterval = 5f;
+    public int damage;
 
     // Start is called before the first frame update
     void Start()
@@ -21,7 +22,7 @@ public class SpawnBullets : MonoBehaviour
         {
             // Instantiate a new bullet at the spawn point
             GameObject newBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
-
+            newBullet.GetComponent<CustomBullet>().damage = damage;
             // Wait for the specified interval before spawning the next bullet
             yield return new WaitForSeconds(spawnInterval);
         }

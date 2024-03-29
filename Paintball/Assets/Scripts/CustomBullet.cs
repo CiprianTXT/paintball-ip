@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using static UnityEngine.UI.Image;
 using UnityEditor.PackageManager;
+using Unity.VisualScripting;
 
 /// Thanks for downloading my custom bullets/projectiles script! :D
 /// Feel free to use it in any project you like!
@@ -39,8 +40,8 @@ public class CustomBullet : MonoBehaviour
     int collisions;
     PhysicMaterial physics_mat;
     public DecalProjector dp;
-    
-
+    private Transform decalHolder;
+    public int damage = 0;
 
     private void Start()
     {
@@ -68,37 +69,6 @@ public class CustomBullet : MonoBehaviour
         // Instantiate explosion
         if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
 
-        // Instantiate color splash
-        DecalProjector decal = Instantiate(dp, transform.position, Quaternion.identity);
-        decal.GetComponent<DecalColorSetter>().splashColor = paintColor;
-
-        Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            float positionMultiplier = 0.01f;
-            float spawnX = hit.point.x - ray.direction.x * positionMultiplier;
-            float spawnY = hit.point.y - ray.direction.y * positionMultiplier;
-            float spawnZ = hit.point.z - ray.direction.z * positionMultiplier;
-            Vector3 spawnLocation = new Vector3(spawnX, spawnY, spawnZ);
-
-
-            //Vector3 spawnLocation = hit.point + hit.normal * positionMultiplier;
-
-            Quaternion targetRot = Quaternion.LookRotation(-transform.forward, transform.up - transform.forward); // Inverse of the hit normal
-            //decal.transform.rotation = targetRot;
-            Vector3 curRot = targetRot.eulerAngles;
-            curRot.x = -curRot.x;
-            curRot.y += 180; 
-            curRot.z = -curRot.z;
-
-            decal.transform.rotation = Quaternion.Euler(curRot);
-            decal.transform.position = spawnLocation;
-        }
-        
-
-
         Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, whatIsEnemies);
 
         foreach (var enemy in enemies)
@@ -106,7 +76,7 @@ public class CustomBullet : MonoBehaviour
             // Get the enemy's collider
             Collider enemyCollider = enemy.GetComponent<Collider>();
             if (enemyCollider == null) continue;
-
+            
         }
         
         //decal.transform.rotation = Quaternion.LookRotation(-transform.forward, transform.up - transform.forward);
@@ -125,25 +95,67 @@ public class CustomBullet : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        //Don't count collisions with other bullets
+        // Don't count collisions with other bullets
         if (collision.collider.CompareTag("Bullet")) return;
 
         // Check if collision is with any child of the parent GameObject
         Transform parentTransform = transform.parent;
         if (parentTransform != null && collision.transform.IsChildOf(parentTransform)) return;
-        
-        //Count up collisions
+
+        // Count up collisions
         collisions++;
 
-        //Explode if bullet hits an enemy directly and explodeOnTouch is activated
-        if (collision.collider.CompareTag("Enemy") && explodeOnTouch) Explode();
+
+        // Explode if bullet hits an enemy directly and explodeOnTouch is activated
+        if (collision.collider.CompareTag("Player") && explodeOnTouch)
+        {
+            //Explode();
+            PlayerStatsHandler stats = collision.gameObject.GetComponent<PlayerStatsHandler>();
+            if (stats != null)
+            {
+                stats.TakeDamage(damage);
+            }
+            Destroy(gameObject);
+            return;
+        }
 
         if (collision.collider.CompareTag("Breakable"))
         {
             Destroy(collision.gameObject);
             Destroy(gameObject);
+            return;
         }
+
+
+        // Get the collision point and normal
+        ContactPoint contact = collision.GetContact(0);
+        Vector3 hitNormal = contact.normal;
+
+        // Define the distance you want the decal to be from the wall
+        float distanceFromWall = 0.1f;
+
+        // Calculate the position a bit further from the wall along the normal
+        Vector3 decalPosition = contact.point + hitNormal * distanceFromWall;
+
+        // Calculate rotation to align decal with the hit normal
+        Quaternion decalRotation = Quaternion.LookRotation(-hitNormal);
+
+        // Add slight rotation around the forward vector
+        float rotationAngle = Random.Range(0f, 360f);
+        Quaternion rotationOffset = Quaternion.AngleAxis(rotationAngle, Vector3.forward);
+        decalRotation *= rotationOffset;
+
+        // Instantiate color splash with position and rotation
+        DecalProjector decal = Instantiate(dp, decalPosition, decalRotation);
+        decal.GetComponent<DecalColorSetter>().splashColor = paintColor;
+
+        decal.transform.parent = decalHolder;
+        
     }
+
+
+
+
 
     private void Setup()
     {
@@ -162,6 +174,8 @@ public class CustomBullet : MonoBehaviour
 
         //Set gravity
         rb.useGravity = useGravity;
+
+        decalHolder = GameObject.Find("DecalHolder").transform;
 
     }
 

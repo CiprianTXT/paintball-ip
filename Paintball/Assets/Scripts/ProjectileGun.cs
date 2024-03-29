@@ -14,6 +14,7 @@ public class ProjectileGun : MonoBehaviour
 {
     //bullet 
     public GameObject bullet;
+    public int bulletDamage;
 
     //bullet force
     public float shootForce, upwardForce;
@@ -117,7 +118,7 @@ public class ProjectileGun : MonoBehaviour
             Shoot();
         }
 
-        transform.eulerAngles = fpsCam.transform.eulerAngles;
+        //transform.eulerAngles = fpsCam.transform.eulerAngles;
 
     }
 
@@ -151,7 +152,7 @@ public class ProjectileGun : MonoBehaviour
         //Rotate bullet to shoot direction
         currentBullet.transform.forward = directionWithSpread.normalized;
 
-
+        currentBullet.GetComponent<CustomBullet>().damage = bulletDamage;
 
 
         //Color the bullet accordingly
@@ -161,7 +162,6 @@ public class ProjectileGun : MonoBehaviour
         bool ok = false;
         foreach (Material mat in materials)
         {
-            Debug.Log(mat.name);
             if (mat.name == "suit_material (Instance)")
             {
                 col = mat.color;
