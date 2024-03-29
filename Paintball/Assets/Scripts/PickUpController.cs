@@ -10,6 +10,7 @@ public class PickUpController : MonoBehaviour
     private Rigidbody rb;
     private MeshCollider coll;
     private Transform player, gunContainer, fpsCam;
+    private Transform droppedGunContainer;
 
     private TextMeshProUGUI ammunitionDisplay;
     private TextMeshProUGUI actionDisplay;
@@ -25,11 +26,12 @@ public class PickUpController : MonoBehaviour
     {
         //Set objects
         fpsCam = GameObject.Find("CameraHolder").GetComponentInChildren<Camera>().transform;
-        gunScript = this.gameObject.GetComponent<ProjectileGun>();
-        rb = this.gameObject.GetComponent<Rigidbody>();
-        coll = this.gameObject.GetComponent<MeshCollider>();
+        gunScript = gameObject.GetComponent<ProjectileGun>();
+        rb = gameObject.GetComponent<Rigidbody>();
+        coll = gameObject.GetComponent<MeshCollider>();
         player = GameObject.Find("Player").transform;
         gunContainer = GameObject.Find("GunHolder").transform;
+        droppedGunContainer = GameObject.Find("DroppedGunHolder").transform;
 
         // Find UI children
         Transform uiCanvas = GameObject.Find("UI").transform;
@@ -40,6 +42,7 @@ public class PickUpController : MonoBehaviour
 
     private void Start()
     {
+
         //Setup
         if (!equipped)
         {
@@ -61,20 +64,59 @@ public class PickUpController : MonoBehaviour
     private void Update()
     {
 
-        //RaycastHit hit;
-        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
         //Check if player is in range and "E" is pressed
         Vector3 distanceToPlayer = player.position - transform.position;
         if (!equipped && distanceToPlayer.magnitude <= pickUpRange && Input.GetKeyDown(KeyCode.E) && !slotFull)
-        { 
-            PickUp();
+        {
+            // Get the gun closest to where the player was looking
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                // Check if the object hit is in the droppedGunContainer
+                Vector3 hitPoint = hit.point;
+                GameObject closestGun = GetClosestGunToHit(droppedGunContainer.transform, hit.point);
+                if (closestGun != null)
+                {
+                    // Pick up the closest gun
+                    PickUpWeapon(closestGun);
+                }
+            }
         }
-        //Drop if equipped and "Q" is pressed
-        if (equipped && Input.GetKeyDown(KeyCode.Q)) Drop();
+
+        // Drop if equipped and "Q" is pressed
+        if (equipped && Input.GetKeyDown(KeyCode.Q))
+        {
+            Drop();
+        }
     }
 
-    private void PickUp()
+    private GameObject GetClosestGunToHit(Transform container, Vector3 hitPos)
+    {
+        GameObject closestGun = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (Transform child in container)
+        {
+            float distance = Vector3.Distance(hitPos, child.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestGun = child.gameObject;
+            }
+        }
+
+        if (closestGun && gameObject.name == closestGun.name)
+        {
+            return closestGun;
+        }
+
+        return null;
+    }
+
+
+    private void PickUpWeapon(GameObject gun)
     {
 
         ammunitionDisplay.enabled = true;
@@ -85,14 +127,14 @@ public class PickUpController : MonoBehaviour
         slotFull = true;
 
         //Make weapon a child of the camera and move it to default position
-        transform.SetParent(gunContainer);
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.Euler(Vector3.zero);
-        transform.localScale = Vector3.one;
+        gun.transform.SetParent(gunContainer);
+        gun.transform.localPosition = Vector3.zero;
+        gun.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        gun.transform.localScale = Vector3.one;
 
         //Make Rigidbody kinematic and BoxCollider a trigger
-        rb.isKinematic = true;
-        coll.isTrigger = true;
+        gun.transform.GetComponent<Rigidbody>().isKinematic = true;
+        gun.transform.GetComponent<MeshCollider>().isTrigger = true;
 
         //Enable script
         gunScript.enabled = true;
@@ -107,8 +149,8 @@ public class PickUpController : MonoBehaviour
         equipped = false;
         slotFull = false;
 
-        //Set parent to null
-        transform.SetParent(null);
+        //Set parent to droppedGunContainer
+        transform.SetParent(droppedGunContainer);
 
         //Make Rigidbody not kinematic and BoxCollider normal
         rb.isKinematic = false;

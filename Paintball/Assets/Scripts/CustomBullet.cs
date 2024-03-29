@@ -54,44 +54,16 @@ public class CustomBullet : MonoBehaviour
         if (collisions > maxCollisions)
         {
             GetComponent<MeshRenderer>().enabled = false;
-            Explode();
+            //Explode();
             Destroy(gameObject);
         }
             
 
         //Count down lifetime
         maxLifetime -= Time.deltaTime;
-        if (maxLifetime <= 0) Explode();
+        if (maxLifetime <= 0) Destroy(gameObject);
     }
 
-    private void Explode()
-    {
-        // Instantiate explosion
-        if (explosion != null) Instantiate(explosion, transform.position, Quaternion.identity);
-
-        Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, whatIsEnemies);
-
-        foreach (var enemy in enemies)
-        {
-            // Get the enemy's collider
-            Collider enemyCollider = enemy.GetComponent<Collider>();
-            if (enemyCollider == null) continue;
-            
-        }
-        
-        //decal.transform.rotation = Quaternion.LookRotation(-transform.forward, transform.up - transform.forward);
-
-        // Add a little delay, just to make sure everything works fine
-        Invoke("Delay", 0.05f);
-    }
-
-
-
-
-    private void Delay()
-    {
-        Destroy(gameObject);
-    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -147,14 +119,13 @@ public class CustomBullet : MonoBehaviour
 
         // Instantiate color splash with position and rotation
         DecalProjector decal = Instantiate(dp, decalPosition, decalRotation);
-        decal.GetComponent<DecalColorSetter>().splashColor = paintColor;
+        DecalColorSetter de = decal.GetComponent<DecalColorSetter>();
+        de.splashColor = paintColor;
 
         decal.transform.parent = decalHolder;
         
+        
     }
-
-
-
 
 
     private void Setup()
@@ -176,7 +147,6 @@ public class CustomBullet : MonoBehaviour
         rb.useGravity = useGravity;
 
         decalHolder = GameObject.Find("DecalHolder").transform;
-
     }
 
     /// Just to visualize the explosion range

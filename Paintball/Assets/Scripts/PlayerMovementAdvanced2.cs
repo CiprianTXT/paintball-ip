@@ -153,7 +153,8 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         if (Input.GetKeyDown(crouchKey))
         {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
-            rb.AddForce(Vector3.down * 50f, ForceMode.Impulse);
+            if (!grounded)
+                rb.AddForce(Vector3.down * 50f, ForceMode.Impulse);
         }
 
         // stop crouch
@@ -190,7 +191,9 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             state = MovementState.crouching;
             desiredMoveSpeed = crouchSpeed;
-            rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+            transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+            if (!grounded)
+                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
 
         // Mode - Sprinting

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -31,9 +32,7 @@ public class DecalColorSetter : MonoBehaviour
 
         while (timer < fadeDuration)
         {
-            alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration);
-
-            //materialCopy.SetColor("_Color", new Color(splashColor.r, splashColor.g, splashColor.b, alpha));
+            alpha = Mathf.Lerp(1f, 0f, timer / fadeDuration); 
             decalProjector.fadeFactor = alpha;
 
             timer += Time.deltaTime;
