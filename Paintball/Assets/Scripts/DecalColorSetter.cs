@@ -41,8 +41,6 @@ public class DecalColorSetter : MonoBehaviour
 
         materialCopy.SetColor("_Color", new Color(splashColor.r, splashColor.g, splashColor.b, 0f));
 
-        yield return new WaitForSeconds(0f);
-
         Destroy(gameObject);
     }
 }

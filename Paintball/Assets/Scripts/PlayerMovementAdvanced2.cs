@@ -94,8 +94,13 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
 
     private void Update()
     {
+        
+        MyInput();
+        SpeedControl();
+        StateHandler();
+
         // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.5f);
+        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.2f);
 
         grounded = false;
         PhysicMaterial playerMaterial = null; // Store the physics material of the player
@@ -111,10 +116,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
             }
         }
 
-        MyInput();
-        SpeedControl();
-        StateHandler();
-
+        
         // handle drag
         if (grounded)
         {
@@ -272,16 +274,18 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         }
 
         // on ground
-        else if(grounded)
+        else if (grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
 
         // in air
-        else if(!grounded)
+        else if (!grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         // turn gravity off while on slope
         rb.useGravity = !OnSlope();
     }
+
+
 
     private void SpeedControl()
     {

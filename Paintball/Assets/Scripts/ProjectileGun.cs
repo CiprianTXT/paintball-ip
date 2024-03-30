@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 /// Thanks for downloading my projectile gun script! :D
 /// Feel free to use it in any project you like!
@@ -21,7 +22,7 @@ public class ProjectileGun : MonoBehaviour
 
     //Gun stats
     public float timeBetweenShooting, spread, reloadTime, timeBetweenShots;
-    public int magazineSize, bulletsPerTap;
+    public int magazineSize, bulletsPerTap, noOfMagazines;
     public bool allowButtonHold;
 
     int bulletsLeft, bulletsShot;
@@ -44,7 +45,6 @@ public class ProjectileGun : MonoBehaviour
 
     //bug fixing :D
     public bool allowInvoke = true;
-
     private Material[] materials;
 
     private void Awake()
@@ -66,7 +66,7 @@ public class ProjectileGun : MonoBehaviour
         playerRb = GameObject.Find("Player").GetComponent<Rigidbody>();
 
         //Extract player materials
-        materials = playerRb.transform.Find("PlayerUpdatedModel").GetComponent<MeshRenderer>().materials;
+        materials = playerRb.transform.Find("PlayerModel").GetComponent<MeshRenderer>().materials;
     }
 
     private void Update()
@@ -79,7 +79,10 @@ public class ProjectileGun : MonoBehaviour
             if (bulletsLeft / bulletsPerTap == 0 && reloading == false)
             {
                 actionDisplay.color = Color.red;
-                actionDisplay.SetText("Reload");
+                if (noOfMagazines > 0)
+                    actionDisplay.SetText("Reload\n(" + noOfMagazines + " available)");
+                else
+                    actionDisplay.SetText("Empty");
 
             }
             else if (reloading == true)
@@ -93,11 +96,12 @@ public class ProjectileGun : MonoBehaviour
             ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
         }
 
-
         MyInput();
-        
-   
+        transform.eulerAngles = fpsCam.transform.eulerAngles;
     }
+
+
+
     private void MyInput()
     {
         //Check if allowed to hold down button and take corresponding input
@@ -117,8 +121,6 @@ public class ProjectileGun : MonoBehaviour
 
             Shoot();
         }
-
-        //transform.eulerAngles = fpsCam.transform.eulerAngles;
 
     }
 
@@ -214,8 +216,13 @@ public class ProjectileGun : MonoBehaviour
 
     private void Reload()
     {
-        reloading = true;
-        Invoke("ReloadFinished", reloadTime); //Invoke ReloadFinished function with your reloadTime as delay
+        if (noOfMagazines > 0)
+        {
+            reloading = true;
+            noOfMagazines -= 1;
+            Invoke("ReloadFinished", reloadTime); //Invoke ReloadFinished function with your reloadTime as delay
+        }
+        
     }
     private void ReloadFinished()
     {

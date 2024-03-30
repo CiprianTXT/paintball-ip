@@ -64,6 +64,11 @@ public class PickUpController : MonoBehaviour
     private void Update()
     {
 
+        if (player.GetComponent<PlayerStatsHandler>().IsDead())
+        {
+            return;
+        }
+
         //Check if player is in range and "E" is pressed
         Vector3 distanceToPlayer = player.position - transform.position;
         if (!equipped && distanceToPlayer.magnitude <= pickUpRange && Input.GetKeyDown(KeyCode.E) && !slotFull)
@@ -169,4 +174,6 @@ public class PickUpController : MonoBehaviour
         //Disable script
         gunScript.enabled = false;
     }
+
+
 }

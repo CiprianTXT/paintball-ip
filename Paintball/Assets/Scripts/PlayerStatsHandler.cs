@@ -9,17 +9,25 @@ public class PlayerStatsHandler : MonoBehaviour
     public int currentHealth;
     private bool isDead = false;
     private Slider healthSlider;
+    private Transform deadCamera;
+    private Transform aliveCamera;
 
     // Start is called before the first frame update
     void Start()
     {
+
+        aliveCamera = GameObject.Find("CombatCam").transform;
+        deadCamera = GameObject.Find("ThirdPersonCam").transform;
+        deadCamera.gameObject.SetActive(false);
+
+
         currentHealth = maxHealth;
 
         // Find the health slider in the UI
         healthSlider = GameObject.Find("UI").GetComponentInChildren<Slider>();
         if (healthSlider == null)
         {
-            Debug.LogError("Health slider not found! Make sure it is a child of the Player GameObject.");
+            Debug.LogError("error");
         }
         else
         {
@@ -54,37 +62,25 @@ public class PlayerStatsHandler : MonoBehaviour
         if (pc && pc.equipped)
             pc.Drop();
 
-        
-
         // Activate ragdoll effect or any other death effect
-        //ActivateRagdoll();
+        ActivateRagdoll();
 
-        // You can add other death-related logic here, like respawn
     }
 
     // Function to activate ragdoll effect
     private void ActivateRagdoll()
     {
-        // Assuming you have a Rigidbody attached to the player
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rb in rigidbodies)
-        {
-            rb.isKinematic = false;
-        }
+        transform.GetComponent<PlayerMovementAdvanced2>().enabled = false;
+        //transform.GetComponent<PickUpController>().Drop();
+        transform.GetComponent<Climbing>().enabled = false;
 
-        // Disable colliders
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        foreach (Collider col in colliders)
-        {
-            col.enabled = false;
-        }
+        deadCamera.gameObject.SetActive(true);
+        aliveCamera.gameObject.SetActive(false);
 
-        // Optional: Add some force to push ragdoll parts away from the center
-        Vector3 forceDirection = transform.position - Camera.main.transform.position;
-        foreach (Rigidbody rb in rigidbodies)
-        {
-            rb.AddForce(forceDirection * 500f);
-        }
+        GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().enabled = false;
+
+        transform.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+
     }
 
     // Function to restore player health
