@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,16 +12,64 @@ public class PlayerStatsHandler : MonoBehaviour
     private Slider healthSlider;
     private Transform deadCamera;
     private Transform aliveCamera;
+    private GameObject customModel;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-
         aliveCamera = GameObject.Find("CombatCam").transform;
         deadCamera = GameObject.Find("ThirdPersonCam").transform;
         deadCamera.gameObject.SetActive(false);
 
 
+        customModel = GameObject.Find("CustomModel");
+        GameObject model = GameObject.Find("PlayerModel");
+        Replace(model, customModel);
+
+        GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+    }
+
+    // Replaces source by dst. 
+    void Replace(GameObject source, GameObject dst)
+    {
+        
+
+        // The Transform defines the position of a game object in the scene hierarchy. 
+        Transform tf_src = source.transform;
+        Transform tf_dst = dst.transform;
+
+        // Make dst a child of the same parent. 
+        tf_dst.parent = tf_src.parent;
+
+        // If necessary, copy over things like local position, rotation and/or scale here. 
+        dst.transform.localPosition = source.transform.localPosition;
+        dst.transform.localRotation = source.transform.localRotation;
+
+
+        // Move child transforms from src to dst. 
+        int count = tf_src.childCount;
+        for (int i = 0; i < count; i++)
+        {
+            // Note that we are MOVING child transforms from src to dst. 
+            // Hence the zero here instead of i. 
+            tf_src.GetChild(0).parent = tf_dst;
+        }
+
+        dst.name = "PlayerModel";
+        dst.tag = "Player";
+        dst.layer = 10; // Player
+       
+        source.transform.parent = null;
+        Destroy(source);
+        
+    }
+
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
+        
         currentHealth = maxHealth;
 
         // Find the health slider in the UI
@@ -60,7 +109,14 @@ public class PlayerStatsHandler : MonoBehaviour
 
         PickUpController pc = gameObject.GetComponentInChildren<PickUpController>();
         if (pc && pc.equipped)
+        {
             pc.Drop();
+            pc.transform.localScale = Vector3.one;
+        }
+            
+
+        //Fix if crouched
+        transform.localScale = Vector3.one;
 
         // Activate ragdoll effect or any other death effect
         ActivateRagdoll();

@@ -88,17 +88,20 @@ public class MainMenuSystem : MonoBehaviour
             {
                 if (materials[i].name == "suit_material (Instance)")
                 {
-                    materials[i].color = new Color(redSlider.value / 255f, greenSlider.value / 255f, blueSlider.value / 255f);
+                    Color c = new Color(redSlider.value / 255f, greenSlider.value / 255f, blueSlider.value / 255f);
+                    materials[i].color = c;
+                    materials[i].SetColor("_Color", c);
                     break; // Exit the loop after changing the color
                 }
             }
         }
-        newPlayer.layer = 11;
+        newPlayer.layer = 11; //UIPlayer
     }
 
     public void Play()
     {
         newPlayer.transform.parent = null;
+        newPlayer.name = "CustomModel";
         GameObject.DontDestroyOnLoad(newPlayer);
         SceneManager.LoadScene("SampleScene");
     }

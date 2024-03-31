@@ -45,7 +45,7 @@ public class ProjectileGun : MonoBehaviour
 
     //bug fixing :D
     public bool allowInvoke = true;
-    private Material[] materials;
+    [SerializeField] private Material[] materials;
 
     private void Awake()
     {
@@ -64,9 +64,6 @@ public class ProjectileGun : MonoBehaviour
 
         //Find player RB
         playerRb = GameObject.Find("Player").GetComponent<Rigidbody>();
-
-        //Extract player materials
-        materials = playerRb.transform.Find("PlayerModel").GetComponent<MeshRenderer>().materials;
     }
 
     private void Update()
@@ -96,6 +93,8 @@ public class ProjectileGun : MonoBehaviour
             ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
         }
 
+
+
         MyInput();
         transform.eulerAngles = fpsCam.transform.eulerAngles;
     }
@@ -112,6 +111,8 @@ public class ProjectileGun : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading) Reload();
         //Reload automatically when trying to shoot without ammo
         if (readyToShoot && shooting && !reloading && bulletsLeft <= 0) Reload();
+
+
 
         //Shooting
         if (readyToShoot && shooting && !reloading && bulletsLeft > 0)
@@ -159,6 +160,8 @@ public class ProjectileGun : MonoBehaviour
 
         //Color the bullet accordingly
 
+        //Extract player materials
+        materials = playerRb.transform.Find("PlayerModel").GetComponent<MeshRenderer>().materials;
 
         Color col = new Color(0, 0, 0);
         bool ok = false;
@@ -166,7 +169,7 @@ public class ProjectileGun : MonoBehaviour
         {
             if (mat.name == "suit_material (Instance)")
             {
-                col = mat.color;
+                col = mat.GetColor("_Color");
                 ok = true;
                 break;
             }
