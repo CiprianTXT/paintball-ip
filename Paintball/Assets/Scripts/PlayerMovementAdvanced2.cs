@@ -98,9 +98,12 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         MyInput();
         SpeedControl();
         StateHandler();
+        float y_pos = playerHeight / 2;
+        if (state == MovementState.crouching)
+            y_pos /= 2;
 
         // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.2f);
+        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, y_pos, 0f), 0.2f);
 
         grounded = false;
         PhysicMaterial playerMaterial = null; // Store the physics material of the player
