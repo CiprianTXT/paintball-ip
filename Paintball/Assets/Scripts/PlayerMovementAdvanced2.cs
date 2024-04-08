@@ -44,7 +44,12 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
     public float maxSlopeAngle;
     private RaycastHit slopeHit;
     private bool exitingSlope;
-    
+
+    [Header("Step Handling")]
+    [SerializeField] GameObject stepRayUpper;
+    [SerializeField] GameObject stepRayLower;
+    [SerializeField] float stepHeight = 0.3f;
+    [SerializeField] float stepSmooth = 0.01f;
 
     public Transform orientation;
 
@@ -77,6 +82,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         readyToJump = true;
 
         startYScale = transform.localScale.y;
+        stepRayUpper.transform.position = stepRayLower.transform.position + new Vector3(0, stepHeight, 0);
     }
 
     private bool IsChildOfTransform(Transform child, Transform parent)
@@ -131,6 +137,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         { 
             rb.drag = 0;
         }
+        StepClimb();
            
     }
 
@@ -167,7 +174,29 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
         }
+
     }
+
+    void StepClimb()
+    {
+        int layerMask = ~(1 << LayerMask.NameToLayer("Player"));
+
+        RaycastHit hitLower;
+        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(moveDirection), out hitLower, 0.4f, layerMask))
+        {
+            Debug.Log("hit low\n");
+            RaycastHit hitUpper;
+            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(moveDirection), out hitUpper, 0.5f, layerMask))
+            {
+                Debug.Log("hit high\n");
+                // Your code when the raycast doesn't hit the specified layer
+                Vector3 targetPosition = rb.position + new Vector3(0, stepSmooth, 0);
+                rb.position = Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 1000);
+            }
+        }
+    }
+
+
 
     private void StateHandler()
     {
@@ -286,6 +315,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
 
         // turn gravity off while on slope
         rb.useGravity = !OnSlope();
+
     }
 
 
