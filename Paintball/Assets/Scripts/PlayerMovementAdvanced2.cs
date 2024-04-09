@@ -44,7 +44,12 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
     public float maxSlopeAngle;
     private RaycastHit slopeHit;
     private bool exitingSlope;
-    
+
+    [Header("Step Handling")]
+    [SerializeField] GameObject stepRayUpper;
+    [SerializeField] GameObject stepRayLower;
+    [SerializeField] float stepHeight = 0.3f;
+    [SerializeField] float stepSmooth = 0.01f;
 
     public Transform orientation;
 
@@ -77,6 +82,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         readyToJump = true;
 
         startYScale = transform.localScale.y;
+        stepRayUpper.transform.position = stepRayLower.transform.position + new Vector3(0, stepHeight, 0);
     }
 
     private bool IsChildOfTransform(Transform child, Transform parent)
@@ -98,9 +104,12 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         MyInput();
         SpeedControl();
         StateHandler();
+        float y_pos = playerHeight / 2;
+        if (state == MovementState.crouching)
+            y_pos /= 2;
 
         // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.2f);
+        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, y_pos, 0f), 0.2f);
 
         grounded = false;
         PhysicMaterial playerMaterial = null; // Store the physics material of the player
@@ -128,6 +137,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         { 
             rb.drag = 0;
         }
+        
            
     }
 
@@ -164,7 +174,47 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
         }
+        StepClimb();
+
     }
+
+    void StepClimb()
+    {
+        int layerMask = (1 << LayerMask.NameToLayer("Ground"));
+
+        RaycastHit hitLower;
+        if (Physics.Raycast(stepRayLower.transform.position, moveDirection, out hitLower, 0.4f, layerMask))
+        {
+            Debug.Log("hit low");
+            RaycastHit hitUpper;
+            bool upHit = Physics.Raycast(stepRayUpper.transform.position, moveDirection, out hitUpper, 0.5f, layerMask);
+
+            if (!upHit)
+            {
+                Debug.Log("not hit high");
+                // Calculate the position to move to
+                Vector3 targetPosition = rb.position + Vector3.up * stepSmooth;
+
+                // Use MovePosition for smooth movement
+                rb.MovePosition(Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 100f));
+            } else
+            {
+                Debug.Log("hit high");
+                float distanceToLower = Vector3.Distance(stepRayLower.transform.position, hitLower.point);
+                float distanceToUpper = Vector3.Distance(stepRayUpper.transform.position, hitUpper.point);
+                if (distanceToLower < distanceToUpper)
+                {
+                    Vector3 targetPosition = rb.position + Vector3.up * stepSmooth;
+
+                    // Use MovePosition for smooth movement
+                    rb.MovePosition(Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 100f));
+                }
+
+            }
+        }
+    }
+
+
 
     private void StateHandler()
     {
@@ -283,6 +333,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
 
         // turn gravity off while on slope
         rb.useGravity = !OnSlope();
+
     }
 
 

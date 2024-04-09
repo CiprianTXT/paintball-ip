@@ -23,9 +23,14 @@ public class PlayerStatsHandler : MonoBehaviour
 
         customModel = GameObject.Find("CustomModel");
         GameObject model = GameObject.Find("PlayerModel");
-        Replace(model, customModel);
-
-        GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+        
+        if (customModel)
+        {
+            Debug.Log(customModel);
+            Replace(model, customModel);
+            GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+        }
+        
     }
 
     // Replaces source by dst. 

@@ -126,7 +126,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 2
 --- !u!114 &2422335758370079399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,8 +153,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c69f0214409bfe4f8b8c3be933bcc6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 7
-  sprintSpeed: 13
+  walkSpeed: 3
+  sprintSpeed: 14
   slideSpeed: 0
   speedIncreaseMultiplier: 100
   slopeIncreaseMultiplier: 100
@@ -172,7 +172,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   grounded: 0
-  maxSlopeAngle: 40
+  maxSlopeAngle: 89
+  stepRayUpper: {fileID: 0}
+  stepRayLower: {fileID: 0}
+  stepHeight: 0.4
+  stepSmooth: 0.05
   orientation: {fileID: 8121964997730349679}
   state: 0
   sliding: 0
@@ -196,14 +200,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   climbSpeed: 7
-  maxClimbTime: 4
+  maxClimbTime: 100
+  climbing: 0
   climbJumpUpForce: 5
   climbJumpBackForce: 2
   jumpKey: 32
   climbJumps: 9
-  detectionLength: 1
-  sphereCastRadius: 0.2
-  maxWallLookAngle: 10
+  detectionLength: 0.5
+  sphereCastRadius: 0.06
+  maxWallLookAngle: 180
   minWallNormalAngleChange: 0
   exitingWall: 0
   exitWallTime: 0.2
