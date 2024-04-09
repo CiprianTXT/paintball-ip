@@ -18,12 +18,14 @@ public class MainMenuSystem : MonoBehaviour
     {
         Transform menu = GameObject.Find("MenuCanvas").transform;
         Transform options = GameObject.Find("OptionsCanvas").transform;
+        Transform networking = GameObject.Find("NetworkCanvas").transform;
 
         redSlider = GameObject.Find("RedSlider").GetComponent<Slider>();
         greenSlider = GameObject.Find("GreenSlider").GetComponent<Slider>();
         blueSlider = GameObject.Find("BlueSlider").GetComponent<Slider>();
 
         options.gameObject.SetActive(false);
+        networking.gameObject.SetActive(false);
     }
 
 
