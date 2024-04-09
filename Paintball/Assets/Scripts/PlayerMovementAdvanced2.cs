@@ -137,7 +137,7 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         { 
             rb.drag = 0;
         }
-        StepClimb();
+        
            
     }
 
@@ -174,24 +174,42 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         {
             transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
         }
+        StepClimb();
 
     }
 
     void StepClimb()
     {
-        int layerMask = ~(1 << LayerMask.NameToLayer("Player"));
+        int layerMask = (1 << LayerMask.NameToLayer("Ground"));
 
         RaycastHit hitLower;
-        if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(moveDirection), out hitLower, 0.4f, layerMask))
+        if (Physics.Raycast(stepRayLower.transform.position, moveDirection, out hitLower, 0.4f, layerMask))
         {
-            Debug.Log("hit low\n");
+            Debug.Log("hit low");
             RaycastHit hitUpper;
-            if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(moveDirection), out hitUpper, 0.5f, layerMask))
+            bool upHit = Physics.Raycast(stepRayUpper.transform.position, moveDirection, out hitUpper, 0.5f, layerMask);
+
+            if (!upHit)
             {
-                Debug.Log("hit high\n");
-                // Your code when the raycast doesn't hit the specified layer
-                Vector3 targetPosition = rb.position + new Vector3(0, stepSmooth, 0);
-                rb.position = Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 1000);
+                Debug.Log("not hit high");
+                // Calculate the position to move to
+                Vector3 targetPosition = rb.position + Vector3.up * stepSmooth;
+
+                // Use MovePosition for smooth movement
+                rb.MovePosition(Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 100f));
+            } else
+            {
+                Debug.Log("hit high");
+                float distanceToLower = Vector3.Distance(stepRayLower.transform.position, hitLower.point);
+                float distanceToUpper = Vector3.Distance(stepRayUpper.transform.position, hitUpper.point);
+                if (distanceToLower < distanceToUpper)
+                {
+                    Vector3 targetPosition = rb.position + Vector3.up * stepSmooth;
+
+                    // Use MovePosition for smooth movement
+                    rb.MovePosition(Vector3.Lerp(rb.position, targetPosition, Time.deltaTime * 100f));
+                }
+
             }
         }
     }
