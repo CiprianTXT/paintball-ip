@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,11 +9,14 @@ using UnityEngine.UI;
 public class MainMenuSystem : MonoBehaviour
 {
     public GameObject[] playerPrefabs; // Array of player prefabs
+
     private Transform model;
     private int currentPrefabIndex = 0;
+
     private Slider redSlider, greenSlider, blueSlider;
     //private Color color = new Color(0, 118, 82);
     public GameObject newPlayer;
+    private Transform favColorText;
 
     private void Awake()
     {
@@ -25,6 +29,9 @@ public class MainMenuSystem : MonoBehaviour
         redSlider = GameObject.Find("RedSlider").GetComponent<Slider>();
         greenSlider = GameObject.Find("GreenSlider").GetComponent<Slider>();
         blueSlider = GameObject.Find("BlueSlider").GetComponent<Slider>();
+
+        favColorText = GameObject.Find("ColorText").transform;
+
 
         options.gameObject.SetActive(false);
         networking.gameObject.SetActive(false);
@@ -72,6 +79,7 @@ public class MainMenuSystem : MonoBehaviour
         UpdatePlayerModel();
     }
 
+
     public void UpdatePlayerModel()
     {
         // Destroy previous player model
@@ -100,6 +108,9 @@ public class MainMenuSystem : MonoBehaviour
                     Color c = new Color(redSlider.value / 255f, greenSlider.value / 255f, blueSlider.value / 255f);
                     materials[i].color = c;
                     materials[i].SetColor("_Color", c);
+
+                    favColorText.GetComponent<TextMeshProUGUI>().color = c;
+
                     break; // Exit the loop after changing the color
                 }
             }
