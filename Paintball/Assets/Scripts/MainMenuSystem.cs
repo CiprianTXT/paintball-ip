@@ -2,18 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Device;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using static UnityEngine.Rendering.DebugUI;
 
 public class MainMenuSystem : MonoBehaviour
 {
     public GameObject[] playerPrefabs; // Array of player prefabs
 
     private Transform model;
-    private int currentPrefabIndex = 0;
+    public int currentPrefabIndex = 0;
 
-    private Slider redSlider, greenSlider, blueSlider;
+    private UnityEngine.UI.Slider redSlider, greenSlider, blueSlider;
     //private Color color = new Color(0, 118, 82);
     public GameObject newPlayer;
     private Transform favColorText;
@@ -26,9 +30,9 @@ public class MainMenuSystem : MonoBehaviour
         Transform hostCanvas = GameObject.Find("HostLobby").transform;
         Transform clientCanvas = GameObject.Find("ClientLobby").transform;
 
-        redSlider = GameObject.Find("RedSlider").GetComponent<Slider>();
-        greenSlider = GameObject.Find("GreenSlider").GetComponent<Slider>();
-        blueSlider = GameObject.Find("BlueSlider").GetComponent<Slider>();
+        redSlider = GameObject.Find("RedSlider").GetComponent<UnityEngine.UI.Slider>();
+        greenSlider = GameObject.Find("GreenSlider").GetComponent<UnityEngine.UI.Slider>();
+        blueSlider = GameObject.Find("BlueSlider").GetComponent<UnityEngine.UI.Slider>();
 
         favColorText = GameObject.Find("ColorText").transform;
 
@@ -39,6 +43,36 @@ public class MainMenuSystem : MonoBehaviour
         clientCanvas.gameObject.SetActive(false);
     }
 
+    public struct PlayerData: INetworkSerializable
+    {
+        public byte _red;
+        public byte _green;
+        public byte _blue;
+        public byte playerModelIndex;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref _red);
+            serializer.SerializeValue(ref _green);
+            serializer.SerializeValue(ref _blue);
+            serializer.SerializeValue(ref playerModelIndex);
+        }
+    }
+
+
+
+    public PlayerData GetPlayerData()
+    {
+        PlayerData data;
+        
+        data._red = (byte)redSlider.value;
+        data._green = (byte)greenSlider.value;
+        data._blue = (byte)blueSlider.value;
+        data.playerModelIndex = (byte)currentPrefabIndex;
+
+        return data;
+
+    }
 
 
     private void Start()
@@ -128,7 +162,7 @@ public class MainMenuSystem : MonoBehaviour
 
     public void Quit()
     {
-        Application.Quit();
+        UnityEngine.Application.Quit();
         Debug.Log("User has quit the application.");
     }
 }
