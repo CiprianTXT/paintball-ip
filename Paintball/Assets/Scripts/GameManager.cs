@@ -33,6 +33,9 @@ public class GameManager : NetworkBehaviour
     public NetworkManager networkManager;
 
     public MainMenuSystem menuSys;
+    ulong actualId = 0;
+    public byte maxPlayers = 16;
+
 
 
     void Start()
@@ -64,7 +67,14 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             Debug.Log("Client connected: " + clientId);
-            //SpawnPlayerIconServerRpc(clientId);
+            Debug.Log(NetworkManager.ConnectedClientsIds.Count);
+            if (NetworkManager.ConnectedClientsIds.Count > maxPlayers)
+            {
+                Debug.Log("Max player number reached. Disconnecting client.");
+                NetworkManager.Singleton.DisconnectClient(clientId);
+                return;
+            }
+
             if (clientId == 0) {
                 CreateNewIconOnServerRpc(menuSys.GetPlayerData(), new RpcParams());
                 playerIcons[0].GetComponent<PlayerIconInfo>().crown.SetActive(true);
@@ -89,10 +99,21 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    void SetIdRpc(ulong id, RpcParams senderParams)
+    {
+        actualId = id;
+    }
+
     [Rpc(SendTo.Server)]
     public void CreateNewIconOnServerRpc(MainMenuSystem.PlayerData data, RpcParams senderParams)
     {
-
+        if (senderParams.Receive.SenderClientId >= maxPlayers)
+        {
+            return;
+        }
+        SetIdRpc(senderParams.Receive.SenderClientId, RpcTarget.Single(senderParams.Receive.SenderClientId, RpcTargetUse.Temp));
         if (senderParams.Receive.SenderClientId != 0)
         {
             Debug.Log($"Update {iconsData.Count}");
@@ -100,6 +121,7 @@ public class GameManager : NetworkBehaviour
             {
                 UploadDataOnNewClientRpc(iconsData[i], RpcTarget.Single(senderParams.Receive.SenderClientId, RpcTargetUse.Temp));
             }
+
         }
 
         UpdateIconsOnClientsRpc(data, senderParams.Receive.SenderClientId);
@@ -108,7 +130,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void UpdateIconsOnClientsRpc(MainMenuSystem.PlayerData data, ulong senderId)
     {
-        Debug.Log($"Im {OwnerClientId} and was sent by {senderId}");
+        Debug.Log($"Im {actualId} and was sent by {senderId}");
         Color col = new Color(data._red / 255f, data._green / 255f, data._blue / 255f);
         GameObject icon = Instantiate(playerIconPrefab, contentShowcase);
         icon.transform.Find("ModelImage").GetComponent<RawImage>().texture = modelIcons[data.playerModelIndex];
@@ -116,6 +138,12 @@ public class GameManager : NetworkBehaviour
         icon.transform.GetComponent<RectTransform>().anchoredPosition = new Vector2(-470 + 150 * playerIcons.Count, -80);
         playerIcons.Add(icon);
         iconsData.Add(data);
+
+        if (actualId == senderId)
+        {
+            icon.GetComponent<PlayerIconInfo>().border.SetActive(true);
+        }
+
     }
 
     [Rpc(SendTo.SpecifiedInParams)]
@@ -128,32 +156,53 @@ public class GameManager : NetworkBehaviour
         icon.transform.Find("ColorBackground").GetComponent<RawImage>().color = col;
         icon.transform.GetComponent<RectTransform>().anchoredPosition = new Vector2(-470 + 150 * playerIcons.Count, -80);
         playerIcons.Add(icon);
-        //icon.GetComponent<PlayerIconInfo>().border.SetActive(true);
-    }
+        iconsData.Add(data);
 
+        //If its the host, activate crown marker
+        if (iconsData.Count == 1)
+        {
+            icon.GetComponent<PlayerIconInfo>().crown.SetActive(true);
+        }
+    }
 
     public void NextGamemode()
     {
         currentGamemodeIndex = (currentGamemodeIndex + 1) % gamemodes.Length;
-        gamemodeText.GetComponent<TMP_Text>().SetText(gamemodes[currentGamemodeIndex]);
+        UpdateGamemodeIndexRpc((byte)currentGamemodeIndex);
     }
 
     public void PrevGamemode()
     {
         currentGamemodeIndex = (currentGamemodeIndex - 1 + gamemodes.Length) % gamemodes.Length;
-        gamemodeText.GetComponent<TMP_Text>().SetText(gamemodes[currentGamemodeIndex]);
+        UpdateGamemodeIndexRpc((byte)currentGamemodeIndex);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void UpdateGamemodeIndexRpc(byte game)
+    {
+
+        gamemodeText.GetComponent<TMP_Text>().SetText(gamemodes[game]);
+        currentGamemodeIndex = game;
     }
 
     public void NextMap()
     {
         currentMapIndex = (currentMapIndex + 1) % mapImages.Length;
-        mapShowcaseImage.GetComponent<RawImage>().texture = mapImages[currentMapIndex];
+        UpdateMapIndexRpc((byte)currentMapIndex);
     }
 
     public void PrevMap()
     {
         currentMapIndex = (currentMapIndex - 1 + mapImages.Length) % mapImages.Length;
-        mapShowcaseImage.GetComponent<RawImage>().texture = mapImages[currentMapIndex];
+        UpdateMapIndexRpc((byte)currentMapIndex);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void UpdateMapIndexRpc(byte map)
+    {
+
+        mapShowcaseImage.GetComponent<RawImage>().texture = mapImages[map];
+        currentMapIndex = map;
     }
 
     public void StartGame()
@@ -168,6 +217,11 @@ public class GameManager : NetworkBehaviour
 
     public void StartClient()
     {
-        NetworkManager.Singleton.StartClient();
+        NetworkManager.Singleton.StartClient();    
     }
+    public void DisconectClient()
+    {
+        NetworkManager.Singleton.DisconnectClient(actualId);
+    }
+
 }
