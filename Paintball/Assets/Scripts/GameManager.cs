@@ -5,6 +5,7 @@ using System.Net;
 using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +35,8 @@ public class GameManager : NetworkBehaviour
 
     public MainMenuSystem menuSys;
     ulong actualId = 0;
+    ulong disconectedClientsCount = 0;
+
     public byte maxPlayers = 16;
 
 
@@ -95,7 +98,22 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             Debug.Log($"Client left {clientId}");
-            //RemovePlayerIcon(clientId);
+            NetworkManager.Singleton.DisconnectClient(clientId);
+            RemovePlayerIconRpc(clientId - disconectedClientsCount);
+            disconectedClientsCount += 1;
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void RemovePlayerIconRpc(ulong idx)
+    {
+
+        Destroy(playerIcons[(int)idx]);
+        playerIcons.RemoveAt((int)idx);
+        iconsData.RemoveAt((int)idx);
+        if (actualId > idx)
+        {
+            actualId -= 1;
         }
     }
 
@@ -113,7 +131,7 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
-        SetIdRpc(senderParams.Receive.SenderClientId, RpcTarget.Single(senderParams.Receive.SenderClientId, RpcTargetUse.Temp));
+        SetIdRpc(senderParams.Receive.SenderClientId - disconectedClientsCount, RpcTarget.Single(senderParams.Receive.SenderClientId, RpcTargetUse.Temp));
         if (senderParams.Receive.SenderClientId != 0)
         {
             Debug.Log($"Update {iconsData.Count}");
@@ -124,13 +142,13 @@ public class GameManager : NetworkBehaviour
 
         }
 
-        UpdateIconsOnClientsRpc(data, senderParams.Receive.SenderClientId);
+        UpdateIconsOnClientsRpc(data, senderParams.Receive.SenderClientId - disconectedClientsCount);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    public void UpdateIconsOnClientsRpc(MainMenuSystem.PlayerData data, ulong senderId)
+    public void UpdateIconsOnClientsRpc(MainMenuSystem.PlayerData data, ulong owner)
     {
-        Debug.Log($"Im {actualId} and was sent by {senderId}");
+        Debug.Log($"Im {actualId} and was sent by {owner}");
         Color col = new Color(data._red / 255f, data._green / 255f, data._blue / 255f);
         GameObject icon = Instantiate(playerIconPrefab, contentShowcase);
         icon.transform.Find("ModelImage").GetComponent<RawImage>().texture = modelIcons[data.playerModelIndex];
@@ -139,7 +157,7 @@ public class GameManager : NetworkBehaviour
         playerIcons.Add(icon);
         iconsData.Add(data);
 
-        if (actualId == senderId)
+        if (actualId == owner)
         {
             icon.GetComponent<PlayerIconInfo>().border.SetActive(true);
         }
@@ -221,7 +239,10 @@ public class GameManager : NetworkBehaviour
     }
     public void DisconectClient()
     {
-        NetworkManager.Singleton.DisconnectClient(actualId);
+        Destroy(playerIcons[(int)actualId]);
+        playerIcons.RemoveAt((int)actualId);
+        iconsData.RemoveAt((int)actualId);
+        NetworkManager.Singleton.Shutdown();
     }
 
 }
