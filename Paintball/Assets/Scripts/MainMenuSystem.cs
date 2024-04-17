@@ -81,7 +81,7 @@ public class MainMenuSystem : MonoBehaviour
         redSlider.value = 0;
         greenSlider.value = 118;
         blueSlider.value = 82;
-        model.rotation = Quaternion.Euler(0, 130f, 0);
+        model.rotation = Quaternion.Euler(0, 180f, 0);
         UpdatePlayerModel();
     }
 
