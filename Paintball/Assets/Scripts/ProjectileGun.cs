@@ -47,6 +47,8 @@ public class ProjectileGun : MonoBehaviour
     public bool allowInvoke = true;
     [SerializeField] private Material[] materials;
 
+    private PickUpController pick;
+
     private void Awake()
     {
         //make sure magazine is full
@@ -54,20 +56,20 @@ public class ProjectileGun : MonoBehaviour
         bulletsLeft = magazineSize;
         readyToShoot = true;
 
-        // Find fpsCam
-        fpsCam = GameObject.Find("CameraHolder").GetComponentInChildren<Camera>();
-
         // Find UI children
         Transform uiCanvas = GameObject.Find("UI").transform;
         ammunitionDisplay = uiCanvas.Find("BulletDisplay").GetComponent<TextMeshProUGUI>();
         actionDisplay = uiCanvas.Find("ActionDisplay").GetComponent<TextMeshProUGUI>();
 
-        //Find player RB
-        playerRb = GameObject.Find("Player").GetComponent<Rigidbody>();
+
+        pick = transform.GetComponent<PickUpController>();
     }
 
     private void Update()
     {
+
+        fpsCam = pick.fpsCam.GetComponent<Camera>();
+        Debug.Log(fpsCam);
 
         //Set ammo display, if it exists :D
         actionDisplay.color = Color.white;
@@ -93,9 +95,9 @@ public class ProjectileGun : MonoBehaviour
             ammunitionDisplay.SetText(bulletsLeft / bulletsPerTap + " / " + magazineSize / bulletsPerTap);
         }
 
-
-
         MyInput();
+
+        
         transform.eulerAngles = fpsCam.transform.eulerAngles;
     }
 
@@ -113,7 +115,7 @@ public class ProjectileGun : MonoBehaviour
         if (readyToShoot && shooting && !reloading && bulletsLeft <= 0) Reload();
 
 
-
+        //Debug.Log($"{readyToShoot} {shooting} {!reloading} {bulletsLeft}");
         //Shooting
         if (readyToShoot && shooting && !reloading && bulletsLeft > 0)
         {
@@ -127,8 +129,10 @@ public class ProjectileGun : MonoBehaviour
 
     private void Shoot()
     {
+        Debug.Log("SHOOTING");
+        Debug.Log(pick.playerRb);
         readyToShoot = false;
-
+        playerRb = pick.playerRb;
         //Find the exact hit position using a raycast
         Ray ray = fpsCam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
@@ -161,7 +165,7 @@ public class ProjectileGun : MonoBehaviour
         //Color the bullet accordingly
 
         //Extract player materials
-        materials = playerRb.transform.Find("PlayerModel").GetComponent<MeshRenderer>().materials;
+        materials = pick.playerRb.transform.Find("PlayerModel").GetComponent<MeshRenderer>().materials;
 
         Color col = new Color(0, 0, 0);
         bool ok = false;

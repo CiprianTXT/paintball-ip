@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
 public class PlayerStatsHandler : MonoBehaviour
 {
@@ -14,18 +15,35 @@ public class PlayerStatsHandler : MonoBehaviour
     private Transform aliveCamera;
     private GameObject customModel;
 
+    public GameObject mainCamera;
+
+    private PhotonView view;
     private void Awake()
     {
-        aliveCamera = GameObject.Find("CombatCam").transform;
-        deadCamera = GameObject.Find("ThirdPersonCam").transform;
+        aliveCamera = transform.parent.Find("CombatCam").transform;
+        aliveCamera.gameObject.SetActive(false);
+
+        GameObject mainCam = transform.parent.Find("CameraHolder").Find("PlayerCam").gameObject;
+        mainCam.SetActive(false);
+
+        deadCamera = transform.parent.Find("ThirdPersonCam").transform;
         deadCamera.gameObject.SetActive(false);
+
+        view = transform.parent.GetComponent<PhotonView>();
 
 
         customModel = GameObject.Find("CustomModel");
-        GameObject model = GameObject.Find("PlayerModel");
+        GameObject model = transform.Find("PlayerModel").gameObject;
         Replace(model, customModel);
 
-        GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+        if (view.IsMine)
+        {
+            mainCam.SetActive(true);
+            mainCam.GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+
+            aliveCamera.gameObject.SetActive(true);
+        }
+        
     }
 
     // Replaces source by dst. 

@@ -2,9 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
 public class PlayerMovementAdvanced2 : MonoBehaviour
 {
+    [Header("MultiplayerOptions")]
+    public PhotonView view;
+
     [Header("Movement")]
     private float moveSpeed;
     public float walkSpeed;
@@ -77,6 +81,8 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
         readyToJump = true;
 
         startYScale = transform.localScale.y;
+
+        view = transform.parent.GetComponent<PhotonView>();
     }
 
     private bool IsChildOfTransform(Transform child, Transform parent)
@@ -95,45 +101,53 @@ public class PlayerMovementAdvanced2 : MonoBehaviour
     private void Update()
     {
         
-        MyInput();
-        SpeedControl();
-        StateHandler();
-
-        // ground check
-        Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight/2, 0f), 0.2f);
-
-        grounded = false;
-        PhysicMaterial playerMaterial = null; // Store the physics material of the player
-
-        foreach (Collider col in colliders)
+        if(view.IsMine)
         {
-            if (!IsChildOfTransform(col.transform, transform) && !col.CompareTag("Player"))
+            MyInput();
+            SpeedControl();
+            StateHandler();
+
+            // ground check
+            Collider[] colliders = Physics.OverlapSphere(transform.position - new Vector3(0f, playerHeight / 2, 0f), 0.2f);
+
+            grounded = false;
+            PhysicMaterial playerMaterial = null; // Store the physics material of the player
+
+            foreach (Collider col in colliders)
             {
-                grounded = true;
-                // Get the PhysicsMaterial of the collider the player is standing on
-                playerMaterial = col.sharedMaterial;
-                break;
+                if (!IsChildOfTransform(col.transform, transform) && !col.CompareTag("Player"))
+                {
+                    grounded = true;
+                    // Get the PhysicsMaterial of the collider the player is standing on
+                    playerMaterial = col.sharedMaterial;
+                    break;
+                }
+            }
+
+
+            // handle drag
+            if (grounded)
+            {
+                if (playerMaterial != null)
+                    rb.drag = playerMaterial.dynamicFriction; // Use dynamicFriction as drag
+                else
+                    rb.drag = groundDrag;
+            }
+            else
+            {
+                rb.drag = 0;
             }
         }
 
+
         
-        // handle drag
-        if (grounded)
-        {
-            if (playerMaterial != null)
-                rb.drag = playerMaterial.dynamicFriction; // Use dynamicFriction as drag
-            else
-                rb.drag = groundDrag;
-        } else
-        { 
-            rb.drag = 0;
-        }
            
     }
 
     private void FixedUpdate()
     {
-        MovePlayer();
+        if (view.IsMine)
+            MovePlayer();
     }
 
     private void MyInput()

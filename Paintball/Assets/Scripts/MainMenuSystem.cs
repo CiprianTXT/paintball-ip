@@ -17,7 +17,7 @@ public class MainMenuSystem : MonoBehaviour
     private Transform model;
     public int currentPrefabIndex = 0;
 
-    private UnityEngine.UI.Slider redSlider, greenSlider, blueSlider;
+    public UnityEngine.UI.Slider redSlider, greenSlider, blueSlider;
     //private Color color = new Color(0, 118, 82);
     public GameObject newPlayer;
     private Transform favColorText;
@@ -157,7 +157,7 @@ public class MainMenuSystem : MonoBehaviour
         newPlayer.transform.parent = null;
         newPlayer.name = "CustomModel";
         GameObject.DontDestroyOnLoad(newPlayer);
-        SceneManager.LoadScene("SampleScene");
+        //SceneManager.LoadScene("SampleScene");
     }
 
     public void Quit()
