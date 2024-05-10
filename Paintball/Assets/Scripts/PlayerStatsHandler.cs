@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
-public class PlayerStatsHandler : MonoBehaviour
+public class PlayerStatsHandler : MonoBehaviourPun
 {
     public int maxHealth = 100;
     public int currentHealth;
@@ -18,33 +18,7 @@ public class PlayerStatsHandler : MonoBehaviour
     public GameObject mainCamera;
 
     private PhotonView view;
-    private void Awake()
-    {
-        aliveCamera = transform.parent.Find("CombatCam").transform;
-        aliveCamera.gameObject.SetActive(false);
 
-        GameObject mainCam = transform.parent.Find("CameraHolder").Find("PlayerCam").gameObject;
-        mainCam.SetActive(false);
-
-        deadCamera = transform.parent.Find("ThirdPersonCam").transform;
-        deadCamera.gameObject.SetActive(false);
-
-        view = transform.parent.GetComponent<PhotonView>();
-
-
-        customModel = GameObject.Find("CustomModel");
-        GameObject model = transform.Find("PlayerModel").gameObject;
-        Replace(model, customModel);
-
-        if (view.IsMine)
-        {
-            mainCam.SetActive(true);
-            mainCam.GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
-
-            aliveCamera.gameObject.SetActive(true);
-        }
-        
-    }
 
     // Replaces source by dst. 
     void Replace(GameObject source, GameObject dst)
@@ -86,28 +60,73 @@ public class PlayerStatsHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        aliveCamera = transform.parent.Find("CombatCam").transform;
+        aliveCamera.gameObject.SetActive(false);
 
+        mainCamera = transform.parent.Find("CameraHolder").Find("PlayerCam").gameObject;
+        mainCamera.SetActive(false);
+
+        deadCamera = transform.parent.Find("ThirdPersonCam").transform;
+        deadCamera.gameObject.SetActive(false);
+
+        view = transform.parent.GetComponent<PhotonView>();
         
         currentHealth = maxHealth;
 
-        // Find the health slider in the UI
-        healthSlider = GameObject.Find("UI").GetComponentInChildren<Slider>();
-        if (healthSlider == null)
+        
+        GameObject model = transform.Find("PlayerModel").gameObject;
+        //Replace(model, customModel);
+
+        
+
+        if (view.IsMine)
         {
-            Debug.LogError("error");
+            mainCamera.SetActive(true);
+            //mainCamera.GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
+
+            aliveCamera.gameObject.SetActive(true);
+
+            
+
+            // Find the health slider in the UI
+            healthSlider = GameObject.Find("UI").GetComponentInChildren<Slider>();
+            if (healthSlider == null)
+            {
+                Debug.LogError("error");
+            }
+            else
+            {
+                // Set the initial value of the slider
+                healthSlider.maxValue = maxHealth;
+                healthSlider.value = currentHealth;
+            }
+
         }
-        else
-        {
-            // Set the initial value of the slider
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth;
-        }
+
+        
     }
+
+    public Transform playerObj;
+    public Transform orientation;
+
+    void Update()
+    {
+        
+        playerObj.rotation = orientation.rotation;
+    }
+
+
+
 
     // Function to reduce player health and update the slider
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead)
+        {
+            Debug.Log("im literally dead");
+            return;
+        }
+        
 
         currentHealth -= damage;
 
@@ -151,10 +170,11 @@ public class PlayerStatsHandler : MonoBehaviour
         deadCamera.gameObject.SetActive(true);
         aliveCamera.gameObject.SetActive(false);
 
-        GameObject.Find("PlayerCam").GetComponent<ThirdPersonCam>().enabled = false;
+        mainCamera.GetComponent<ThirdPersonCam>().enabled = false;
 
         transform.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
 
+        transform.GetComponent<Rigidbody>().useGravity = true;
     }
 
     // Function to restore player health
@@ -187,10 +207,14 @@ public class PlayerStatsHandler : MonoBehaviour
     // Function to update the health slider
     private void UpdateHealthUI()
     {
-        if (healthSlider != null)
+        if (view.IsMine)
         {
-            healthSlider.value = currentHealth;
+            if (healthSlider != null)
+            {
+                healthSlider.value = currentHealth;
+            }
         }
+        
     }
 
     // Optional function to check if player is dead

@@ -69,7 +69,6 @@ public class ProjectileGun : MonoBehaviour
     {
 
         fpsCam = pick.fpsCam.GetComponent<Camera>();
-        Debug.Log(fpsCam);
 
         //Set ammo display, if it exists :D
         actionDisplay.color = Color.white;
@@ -129,8 +128,6 @@ public class ProjectileGun : MonoBehaviour
 
     private void Shoot()
     {
-        Debug.Log("SHOOTING");
-        Debug.Log(pick.playerRb);
         readyToShoot = false;
         playerRb = pick.playerRb;
         //Find the exact hit position using a raycast

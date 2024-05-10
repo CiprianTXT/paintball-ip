@@ -47,7 +47,7 @@ public class PickUpController : MonoBehaviour
         //Setup
         if (!equipped)
         {
-            Debug.Log($"gunscript is {gunScript} and is {gunScript.enabled}");
+            //Debug.Log($"gunscript is {gunScript} and is {gunScript.enabled}");
             gunScript.enabled = false;
             rb.isKinematic = false;
             coll.isTrigger = false;
@@ -83,19 +83,19 @@ public class PickUpController : MonoBehaviour
                 RaycastHit hit;
                 fpsCam = GameObject.Find("CameraHolder").GetComponentInChildren<Camera>().transform;
                 Ray ray = fpsCam.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-                Debug.Log($"aaaa {droppedGunContainer}  {gunContainer}");
+                //Debug.Log($"aaaa {droppedGunContainer}  {gunContainer}");
                 if(droppedGunContainer == null)
                     droppedGunContainer = GameObject.Find("DroppedGunHolder").transform;
                 if(gunContainer == null)
                     gunContainer = GameObject.Find("GunHolder").transform;
-                Debug.Log($"bbbb {droppedGunContainer}  {gunContainer}");
-                Debug.Log("aalalalalalalalala");
+                //Debug.Log($"bbbb {droppedGunContainer}  {gunContainer}");
+                //Debug.Log("aalalalalalalalala");
                 if (Physics.Raycast(ray, out hit))
                 {
                     // Check if the object hit is in the droppedGunContainer
                     Vector3 hitPoint = hit.point;
-                    Debug.Log($"{droppedGunContainer}");
-                    Debug.Log($"{ hit.point}");
+                    //Debug.Log($"{droppedGunContainer}");
+                    //Debug.Log($"{ hit.point}");
                     GameObject closestGun = GetClosestGunToHit(droppedGunContainer.transform, hit.point);
                     if (closestGun != null)
                     {
