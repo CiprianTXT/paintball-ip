@@ -129,6 +129,8 @@ GameObject:
   - component: {fileID: -4576524758213829725}
   - component: {fileID: 3294090749153129994}
   - component: {fileID: -4877748914393472509}
+  - component: {fileID: 5073894791750780349}
+  - component: {fileID: -117850248660135145}
   m_Layer: 0
   m_Name: Rifle
   m_TagString: Untagged
@@ -267,6 +269,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bullet: {fileID: 2949730657375550734, guid: 696bb539bc413824a9f151060b45ad84, type: 3}
+  bulletDamage: 0
   shootForce: 60
   upwardForce: 0
   timeBetweenShooting: 0.2
@@ -275,11 +278,13 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   magazineSize: 30
   bulletsPerTap: 1
+  noOfMagazines: 0
   allowButtonHold: 1
   recoilForce: 1.8
   attackPoint: {fileID: 8622943461334539483}
   muzzleFlash: {fileID: 0}
   allowInvoke: 1
+  materials: []
 --- !u!114 &-4877748914393472509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -292,10 +297,68 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f8ffbe3c7c32594c8963a7a84dbaf24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fpsCam: {fileID: 0}
+  playerRb: {fileID: 0}
   pickUpRange: 4
   dropForwardForce: 7
   dropUpwardForce: 3
   equipped: 0
+--- !u!114 &5073894791750780349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3547625546888837016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: -117850248660135145}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &-117850248660135145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3547625546888837016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 2
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 1
+    ExtrapolateOption: 0
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 1
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 0
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!1 &6642004136758779463
 GameObject:
   m_ObjectHideFlags: 0

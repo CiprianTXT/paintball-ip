@@ -965,6 +965,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Rifle 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5073894791750780349, guid: b39408202f195a946a188c2cc9075200, type: 3}
+      propertyPath: sceneViewId
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5073894791750780349, guid: b39408202f195a946a188c2cc9075200, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1123,6 +1131,10 @@ PrefabInstance:
     - target: {fileID: -755339509718208554, guid: 0e7318dfa08983f418cd35cb21c97c0f, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2217481002934273818, guid: 0e7318dfa08983f418cd35cb21c97c0f, type: 3}
+      propertyPath: sceneViewId
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4241254283719641585, guid: 0e7318dfa08983f418cd35cb21c97c0f, type: 3}
       propertyPath: bullet
@@ -1423,6 +1435,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2217481002934273818, guid: 0e7318dfa08983f418cd35cb21c97c0f, type: 3}
+      propertyPath: sceneViewId
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4241254283719641585, guid: 0e7318dfa08983f418cd35cb21c97c0f, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -1608,6 +1624,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 965441390}
+  - component: {fileID: 965441391}
   m_Layer: 0
   m_Name: DroppedGunHolder
   m_TagString: Untagged
@@ -1635,6 +1652,28 @@ Transform:
   - {fileID: 249187476}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &965441391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965441389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 2
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1110435190
 GameObject:
   m_ObjectHideFlags: 0
@@ -3176,6 +3215,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4711467380184988043, guid: 144d7a2d333d1e148940ee693c4cde88, type: 3}
+      propertyPath: sceneViewId
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4982893966281562141, guid: 144d7a2d333d1e148940ee693c4cde88, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -3860,6 +3903,10 @@ PrefabInstance:
     - target: {fileID: 3599699710706979538, guid: 144d7a2d333d1e148940ee693c4cde88, type: 3}
       propertyPath: gunContainer
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4711467380184988043, guid: 144d7a2d333d1e148940ee693c4cde88, type: 3}
+      propertyPath: sceneViewId
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4982893966281562141, guid: 144d7a2d333d1e148940ee693c4cde88, type: 3}
       propertyPath: fpsCam

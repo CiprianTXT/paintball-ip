@@ -147,7 +147,8 @@ public class PlayerStatsHandler : MonoBehaviourPun
         PickUpController pc = gameObject.GetComponentInChildren<PickUpController>();
         if (pc && pc.equipped)
         {
-            pc.Drop();
+            //pc.Drop();
+            view.RPC("Drop", RpcTarget.All, view.ViewID / 1000 );
             pc.transform.localScale = Vector3.one;
         }
             

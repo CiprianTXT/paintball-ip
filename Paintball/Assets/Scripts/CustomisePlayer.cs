@@ -69,6 +69,14 @@ public class CustomisePlayer : MonoBehaviourPun, IPunInstantiateMagicCallback
 
                         // Update the materials array with the resized one
                         playerRenderer.materials = resizedMaterials;
+
+                    } else if ((int)data[1] == 3)
+                    {
+                        Material aux = materials[0];
+                        materials[0] = materials[1];
+                        materials[1] = aux;
+
+                        playerRenderer.materials = materials;
                     }
 
                     break; // Exit the loop after changing the color

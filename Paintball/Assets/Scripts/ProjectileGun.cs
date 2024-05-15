@@ -2,6 +2,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using Photon.Pun;
 
 /// Thanks for downloading my projectile gun script! :D
 /// Feel free to use it in any project you like!
@@ -49,8 +50,12 @@ public class ProjectileGun : MonoBehaviour
 
     private PickUpController pick;
 
+    private PhotonView view;
+
     private void Awake()
     {
+        view = transform.GetComponent<PhotonView>();
+
         //make sure magazine is full
 
         bulletsLeft = magazineSize;
@@ -67,6 +72,10 @@ public class ProjectileGun : MonoBehaviour
 
     private void Update()
     {
+        if (!transform.parent.GetComponent<PhotonView>().IsMine)
+        {
+            return;
+        }
 
         fpsCam = pick.fpsCam.GetComponent<Camera>();
 

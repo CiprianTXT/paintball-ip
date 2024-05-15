@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
 public class PickUpController : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class PickUpController : MonoBehaviour
     public bool equipped;
     public static bool slotFull;
 
+    PhotonView view;
+    int my_id;
+
     private void Awake()
     {
         //Set objects
@@ -34,6 +38,8 @@ public class PickUpController : MonoBehaviour
     private void Start()
     {
 
+        view = transform.GetComponent<PhotonView>();
+
         gunScript = gameObject.GetComponent<ProjectileGun>();
         rb = gameObject.GetComponent<Rigidbody>();
         coll = gameObject.GetComponent<MeshCollider>();
@@ -43,6 +49,18 @@ public class PickUpController : MonoBehaviour
         ammunitionDisplay = uiCanvas.Find("BulletDisplay").GetComponent<TextMeshProUGUI>();
         actionDisplay = uiCanvas.Find("ActionDisplay").GetComponent<TextMeshProUGUI>();
         backgroundAmmo = uiCanvas.Find("BackgroundDisplayBullets").GetComponent<Image>();
+
+
+
+
+
+        
+        
+            
+
+
+
+
 
         //Setup
         if (!equipped)
@@ -71,23 +89,47 @@ public class PickUpController : MonoBehaviour
             return;
         }*/
 
+
         //Check if player is in range and "E" is pressed
         if (!equipped && Input.GetKeyDown(KeyCode.E) && !slotFull)
         {
-            player = GameObject.Find("Player").transform;
+            //player = GameObject.Find("Player").transform;
+
+
+            int player_id = -1;
+            Transform playerHolder = GameObject.Find("PlayerHolder").transform;
+            int playerNo = (int)playerHolder.childCount;
+            for (int i = 0; i < playerNo; i++)
+            {
+                if (playerHolder.GetChild(i).GetComponent<PhotonView>().IsMine)
+                {
+                    player_id = playerHolder.GetChild(i).GetComponent<PhotonView>().ViewID;
+                    break;
+                }
+            }
+            my_id = player_id;
+
+            player = PhotonView.Find(player_id + 1).gameObject.transform;
+            Debug.Log($"i should be {player} with {player_id}");
+
+
+
             Vector3 distanceToPlayer = player.position - transform.position;
+            
+            //player = PhotonNetwork.LocalPlayer.UserId;
 
             if (distanceToPlayer.magnitude <= pickUpRange)
             {
                 // Get the gun closest to where the player was looking
                 RaycastHit hit;
-                fpsCam = GameObject.Find("CameraHolder").GetComponentInChildren<Camera>().transform;
+                fpsCam = player.parent.transform.Find("CameraHolder").GetComponentInChildren<Camera>().transform;
                 Ray ray = fpsCam.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
                 //Debug.Log($"aaaa {droppedGunContainer}  {gunContainer}");
-                if(droppedGunContainer == null)
-                    droppedGunContainer = GameObject.Find("DroppedGunHolder").transform;
-                if(gunContainer == null)
-                    gunContainer = GameObject.Find("GunHolder").transform;
+
+                droppedGunContainer = PhotonView.Find(2).transform;
+
+                gunContainer = PhotonView.Find(player_id + 2).transform;
+
                 //Debug.Log($"bbbb {droppedGunContainer}  {gunContainer}");
                 //Debug.Log("aalalalalalalalala");
                 if (Physics.Raycast(ray, out hit))
@@ -99,8 +141,11 @@ public class PickUpController : MonoBehaviour
                     GameObject closestGun = GetClosestGunToHit(droppedGunContainer.transform, hit.point);
                     if (closestGun != null)
                     {
+                        int id = player.GetComponent<PhotonView>().ViewID/1000;
+                        Debug.Log($"my id is {id}");
                         // Pick up the closest gun
-                        PickUpWeapon(closestGun);
+                        view.RPC("PickUpWeapon", RpcTarget.All, closestGun.GetComponent<PhotonView>().ViewID, id);
+                        //PickUpWeapon(closestGun, id);
                     }
                 }
             }
@@ -110,7 +155,8 @@ public class PickUpController : MonoBehaviour
         // Drop if equipped and "Q" is pressed
         if (equipped && Input.GetKeyDown(KeyCode.Q))
         {
-            Drop();
+            //Drop();
+            view.RPC("Drop", RpcTarget.All, my_id / 1000);
         }
     }
 
@@ -138,15 +184,15 @@ public class PickUpController : MonoBehaviour
     }
 
 
-    private void PickUpWeapon(GameObject gun)
+    [PunRPC]
+    public void PickUpWeapon(int gun_id, int sender_id)
     {
-
-        ammunitionDisplay.enabled = true;
-        actionDisplay.enabled = true;
-        backgroundAmmo.enabled = true;
+        GameObject gun = PhotonView.Find(gun_id).gameObject;
 
         equipped = true;
-        slotFull = true;
+
+        //Transform model = PhotonView.Find((int)data[0] * 1000 + 2).gameObject.transform.Find("PlayerModel");
+        gunContainer = PhotonView.Find(sender_id * 1000 + 3).gameObject.transform;
 
         //Make weapon a child of the camera and move it to default position
         gun.transform.SetParent(gunContainer);
@@ -158,21 +204,44 @@ public class PickUpController : MonoBehaviour
         gun.transform.GetComponent<Rigidbody>().isKinematic = true;
         gun.transform.GetComponent<MeshCollider>().isTrigger = true;
 
-        //Enable script
-        gunScript.enabled = true;
+        Transform sender = PhotonView.Find(sender_id * 1000 + 2).transform;
 
+
+        Debug.Log($"{my_id} and was sent by {sender_id}");
+
+        if (my_id / 1000 == sender_id)
+        {
+
+            ammunitionDisplay.enabled = true;
+            actionDisplay.enabled = true;
+            backgroundAmmo.enabled = true;
+
+            
+            slotFull = true;
+
+            //Enable script
+            Debug.Log("it should work");
+            gunScript.enabled = true;
+            playerRb = sender.GetComponent<Rigidbody>();
+        }
         
-        playerRb = player.GetComponent<Rigidbody>();
     }
 
-    public void Drop()
+    [PunRPC]
+    public void Drop(int player_id)
     {
-        ammunitionDisplay.enabled = false;
-        actionDisplay.enabled = false;
-        backgroundAmmo.enabled = false;
+        if (player_id == my_id / 1000)
+        {
+            ammunitionDisplay.enabled = false;
+            actionDisplay.enabled = false;
+            backgroundAmmo.enabled = false;
+
+            slotFull = false;
+        }
+        
 
         equipped = false;
-        slotFull = false;
+        
 
         //Set parent to droppedGunContainer
         transform.SetParent(droppedGunContainer);
@@ -181,12 +250,14 @@ public class PickUpController : MonoBehaviour
         rb.isKinematic = false;
         coll.isTrigger = false;
 
+        Transform player = PhotonView.Find(player_id * 1000 + 2).transform;
+
         //Gun carries momentum of player
         rb.velocity = player.GetComponent<Rigidbody>().velocity;
 
         //AddForce
-        rb.AddForce(fpsCam.forward * dropForwardForce, ForceMode.Impulse);
-        rb.AddForce(fpsCam.up * dropUpwardForce, ForceMode.Impulse);
+        rb.AddForce(player.Find("PlayerModel").transform.forward * dropForwardForce, ForceMode.Impulse);
+        rb.AddForce(player.Find("PlayerModel").transform.forward * dropUpwardForce, ForceMode.Impulse);
         //Add random rotation
         float random = Random.Range(-1f, 1f);
         rb.AddTorque(new Vector3(random, random, random) * 10);
