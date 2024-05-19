@@ -20,42 +20,6 @@ public class PlayerStatsHandler : MonoBehaviourPun
     private PhotonView view;
 
 
-    // Replaces source by dst. 
-    void Replace(GameObject source, GameObject dst)
-    {
-        
-
-        // The Transform defines the position of a game object in the scene hierarchy. 
-        Transform tf_src = source.transform;
-        Transform tf_dst = dst.transform;
-
-        // Make dst a child of the same parent. 
-        tf_dst.parent = tf_src.parent;
-
-        // If necessary, copy over things like local position, rotation and/or scale here. 
-        dst.transform.localPosition = source.transform.localPosition;
-        dst.transform.localRotation = source.transform.localRotation;
-
-
-        // Move child transforms from src to dst. 
-        int count = tf_src.childCount;
-        for (int i = 0; i < count; i++)
-        {
-            // Note that we are MOVING child transforms from src to dst. 
-            // Hence the zero here instead of i. 
-            tf_src.GetChild(0).parent = tf_dst;
-        }
-
-        dst.name = "PlayerModel";
-        dst.tag = "Player";
-        dst.layer = 10; // Player
-       
-        source.transform.parent = null;
-        Destroy(source);
-        
-    }
-
-
 
     // Start is called before the first frame update
     void Start()
@@ -63,8 +27,13 @@ public class PlayerStatsHandler : MonoBehaviourPun
         aliveCamera = transform.parent.Find("CombatCam").transform;
         aliveCamera.gameObject.SetActive(false);
 
-        mainCamera = transform.parent.Find("CameraHolder").Find("PlayerCam").gameObject;
+        Transform camHolder = transform.parent.Find("CameraHolder");
+
+        mainCamera = camHolder.Find("PlayerCam").gameObject;
         mainCamera.SetActive(false);
+
+        camHolder.gameObject.SetActive(false);
+        
 
         deadCamera = transform.parent.Find("ThirdPersonCam").transform;
         deadCamera.gameObject.SetActive(false);
@@ -75,13 +44,16 @@ public class PlayerStatsHandler : MonoBehaviourPun
 
         
         GameObject model = transform.Find("PlayerModel").gameObject;
-        //Replace(model, customModel);
-
+      
+        Rigidbody rb = model.transform.parent.GetComponent<Rigidbody>();
         
 
         if (view.IsMine)
         {
-            mainCamera.SetActive(true);
+            
+
+            mainCamera.gameObject.SetActive(true);
+            camHolder.gameObject.SetActive(true);
             //mainCamera.GetComponent<ThirdPersonCam>().playerObj = customModel.transform;
 
             aliveCamera.gameObject.SetActive(true);
@@ -101,6 +73,9 @@ public class PlayerStatsHandler : MonoBehaviourPun
                 healthSlider.value = currentHealth;
             }
 
+        } else
+        {
+            rb.isKinematic = true;
         }
 
         
@@ -148,7 +123,8 @@ public class PlayerStatsHandler : MonoBehaviourPun
         if (pc && pc.equipped)
         {
             //pc.Drop();
-            view.RPC("Drop", RpcTarget.All, view.ViewID / 1000 );
+            PhotonView pv = pc.transform.GetComponent<PhotonView>();
+            pv.RPC("Drop", RpcTarget.All, pv.ViewID, view.ViewID / 1000);
             pc.transform.localScale = Vector3.one;
         }
             

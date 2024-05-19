@@ -26,7 +26,7 @@ public class ProjectileGun : MonoBehaviour
     public int magazineSize, bulletsPerTap, noOfMagazines;
     public bool allowButtonHold;
 
-    int bulletsLeft, bulletsShot;
+    public int bulletsLeft, bulletsShot;
 
     //Recoil
     private Rigidbody playerRb;
@@ -72,10 +72,10 @@ public class ProjectileGun : MonoBehaviour
 
     private void Update()
     {
-        if (!transform.parent.GetComponent<PhotonView>().IsMine)
+        /*if (!transform.parent.GetComponent<PhotonView>().IsMine)
         {
             return;
-        }
+        }*/
 
         fpsCam = pick.fpsCam.GetComponent<Camera>();
 
@@ -107,6 +107,33 @@ public class ProjectileGun : MonoBehaviour
 
         
         transform.eulerAngles = fpsCam.transform.eulerAngles;
+
+        SendRotationToServer(transform.rotation);
+    }
+
+
+    private void SendRotationToServer(Quaternion rotation)
+    {
+        view.RPC("UpdateGunRotationOnServer", RpcTarget.MasterClient, rotation);
+    }
+
+    [PunRPC]
+    public void UpdateGunRotationOnServer(Quaternion rotation, PhotonMessageInfo info)
+    {
+       
+        // Update the rotation on the server
+        transform.rotation = rotation;
+
+        // Broadcast the updated rotation to all clients
+        view.RPC("UpdateGunRotationOnClients", RpcTarget.OthersBuffered, rotation);
+
+    }
+
+    [PunRPC]
+    public void UpdateGunRotationOnClients(Quaternion rotation)
+    {
+        // Update the rotation on the clients
+        transform.rotation = rotation;
     }
 
 
@@ -193,18 +220,27 @@ public class ProjectileGun : MonoBehaviour
         {
             currentBullet.GetComponent<CustomBullet>().paintColor = col;
         }
-       
+
+        Vector3 force_forward = directionWithSpread.normalized * shootForce;
+        Vector3 force_up = fpsCam.transform.up * upwardForce;
+
+        bulletsLeft--;
+        bulletsShot++;
+
+
+        view.RPC("ShootOnServer", RpcTarget.Others, view.ViewID, attackPoint.position, new Vector3(col.r, col.g, col.b), force_forward, force_up, bulletsLeft, bulletsShot, noOfMagazines);
+
+
 
         //Add forces to bullet
-        currentBullet.GetComponent<Rigidbody>().AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
-        currentBullet.GetComponent<Rigidbody>().AddForce(fpsCam.transform.up * upwardForce, ForceMode.Impulse);
+        currentBullet.GetComponent<Rigidbody>().AddForce(force_forward, ForceMode.Impulse);
+        currentBullet.GetComponent<Rigidbody>().AddForce(force_up, ForceMode.Impulse);
 
         //Instantiate muzzle flash, if you have one
         if (muzzleFlash != null)
             Instantiate(muzzleFlash, attackPoint.position, Quaternion.identity);
 
-        bulletsLeft--;
-        bulletsShot++;
+        
 
         //Invoke resetShot function (if not already invoked), with your timeBetweenShooting
         if (allowInvoke)
@@ -234,6 +270,7 @@ public class ProjectileGun : MonoBehaviour
             reloading = true;
             noOfMagazines -= 1;
             Invoke("ReloadFinished", reloadTime); //Invoke ReloadFinished function with your reloadTime as delay
+        
         }
         
     }
@@ -242,5 +279,6 @@ public class ProjectileGun : MonoBehaviour
         //Fill magazine
         bulletsLeft = magazineSize;
         reloading = false;
+
     }
 }

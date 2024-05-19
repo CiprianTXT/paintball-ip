@@ -41,6 +41,11 @@ MonoBehaviour:
   - RespawnSpaceship
   - Drop
   - PickUpWeapon
+  - UpdateGunRotationOnClients
+  - UpdateGunRotationOnServer
+  - ShootOnServer
+  - SyncBulletCount
+  - SyncReload
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
