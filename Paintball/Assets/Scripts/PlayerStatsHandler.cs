@@ -10,7 +10,7 @@ public class PlayerStatsHandler : MonoBehaviourPun
     public int maxHealth = 100;
     public int currentHealth;
     private bool isDead = false;
-    private Slider healthSlider;
+    [SerializeField] private Slider healthSlider;
     private Transform deadCamera;
     private Transform aliveCamera;
     private GameObject customModel;
@@ -18,6 +18,7 @@ public class PlayerStatsHandler : MonoBehaviourPun
     public GameObject mainCamera;
 
     private PhotonView view;
+    private PhotonView player_view;
 
 
 
@@ -41,8 +42,8 @@ public class PlayerStatsHandler : MonoBehaviourPun
         view = transform.parent.GetComponent<PhotonView>();
         
         currentHealth = maxHealth;
+        player_view = transform.GetComponent<PhotonView>();
 
-        
         GameObject model = transform.Find("PlayerModel").gameObject;
       
         Rigidbody rb = model.transform.parent.GetComponent<Rigidbody>();
@@ -90,6 +91,14 @@ public class PlayerStatsHandler : MonoBehaviourPun
         playerObj.rotation = orientation.rotation;
     }
 
+    public void UpdateRefs()
+    {
+        Debug.Log("Updated health ref");
+        healthSlider = GameObject.Find("UI").GetComponentInChildren<Slider>();
+        // Set the initial value of the slider
+        healthSlider.maxValue = maxHealth;
+        healthSlider.value = currentHealth;
+    }
 
 
 
@@ -111,6 +120,10 @@ public class PlayerStatsHandler : MonoBehaviourPun
         if (currentHealth <= 0)
         {
             Die();
+            if (view.IsMine)
+            {
+                player_view.RPC("UpdateDeath", RpcTarget.All, view.ViewID / 1000 - 1);
+            }        
         }
     }
 
@@ -154,6 +167,43 @@ public class PlayerStatsHandler : MonoBehaviourPun
         transform.GetComponent<Rigidbody>().useGravity = true;
     }
 
+
+    public void Revive()
+    {
+        if (view.IsMine)
+        {
+
+            if (!isDead) return;
+
+            isDead = false;
+
+            // Reset health
+            currentHealth = maxHealth;
+            UpdateHealthUI();
+
+            // Disable the dead camera and enable the alive camera
+            deadCamera.gameObject.SetActive(false);
+            aliveCamera.gameObject.SetActive(true);
+
+            // Enable the main camera and its components
+            mainCamera.GetComponent<ThirdPersonCam>().enabled = true;
+
+            // Enable player movement and climbing scripts
+            transform.GetComponent<PlayerMovementAdvanced2>().enabled = true;
+            transform.GetComponent<Climbing>().enabled = true;
+
+            // Reset the Rigidbody constraints and gravity
+            Rigidbody rb = transform.GetComponent<Rigidbody>();
+            rb.constraints = RigidbodyConstraints.FreezeRotation; // Or whatever constraints you had initially
+            rb.useGravity = false; // Or true if the player should have gravity enabled initially
+
+            // If the player was crouched, ensure the scale is reset
+            transform.localScale = Vector3.one;
+            Debug.Log("Player revived");
+        }
+
+    }
+
     // Function to restore player health
     public void Heal(int amount)
     {
@@ -184,14 +234,11 @@ public class PlayerStatsHandler : MonoBehaviourPun
     // Function to update the health slider
     private void UpdateHealthUI()
     {
-        if (view.IsMine)
+        if (healthSlider != null)
         {
-            if (healthSlider != null)
-            {
-                healthSlider.value = currentHealth;
-            }
+            healthSlider.value = currentHealth;
         }
-        
+
     }
 
     // Optional function to check if player is dead
@@ -199,4 +246,79 @@ public class PlayerStatsHandler : MonoBehaviourPun
     {
         return isDead;
     }
+
+
+    [PunRPC]
+    public void UpdateDeath(int sender_id)
+    {
+        GameManagerScript gms = GameObject.Find("GameManager").GetComponent<GameManagerScript>();
+        gms.player_dead_stats[sender_id] = true;
+        if (view.IsMine)
+        {
+            int winner = -1;
+            for (int i = 0; i < gms.player_dead_stats.Length; i++)
+            {
+                if (gms.player_dead_stats[i] == false && winner == -1)
+                {
+                    winner = i;
+                }
+                else if (gms.player_dead_stats[i] == false && winner != -1)
+                {
+                    winner = -2;
+                    break;
+                }
+            }
+            if (winner >= 0)
+            {
+                Transform pl_holder = GameObject.Find("PlayerHolder").transform;
+                foreach(Transform pl in pl_holder.transform)
+                {
+                    PhotonView pv = pl.transform.GetChild(1).GetComponent<PhotonView>();
+                    pv.RPC("UpdateScore", RpcTarget.All, winner);
+                }
+                
+            }
+        }
+    }
+
+    [PunRPC]
+    public void UpdateScore(int winner)
+    {
+        if (view.IsMine)
+        {
+            Debug.Log($"Winner is {winner} and im {view.ViewID}");
+            GameManagerScript gms = GameObject.Find("GameManager").GetComponent<GameManagerScript>();
+            gms.game_scores[winner] += 1;
+            gms.first_game = false;
+
+            Debug.Log(gameObject.transform.GetChild(1));
+            Debug.Log(gameObject.transform.GetChild(0).GetChild(0));
+
+            PickUpController pc = gameObject.transform.GetChild(0).GetChild(0).GetComponentInChildren<PickUpController>();
+
+            if (pc && pc.equipped)
+            {
+                //pc.Drop();
+                PhotonView pv = pc.transform.GetComponent<PhotonView>();
+                pv.RPC("Drop", RpcTarget.All, pv.ViewID, view.ViewID / 1000);
+                pc.transform.localScale = Vector3.one;
+                Debug.Log("I dropped the gun");
+            }
+
+            gms.UpdateAllScores();
+
+            Transform player_holder = GameObject.Find("PlayerHolder").transform;
+            foreach (Transform child in player_holder.transform)
+                if (child.transform.GetChild(1).GetComponent<PlayerStatsHandler>().IsDead() == true)
+                {
+                    child.transform.GetChild(1).GetComponent<PlayerStatsHandler>().Revive();
+                }
+
+            if (view.ViewID == 1001)
+                gms.ResetGame();
+        }
+        
+
+    }
+
 }
